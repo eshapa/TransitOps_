@@ -273,8 +273,10 @@ const TripManagement = () => {
                 })}
               </tbody>
             </table>
-          )}>
+          )}
+        </div>
       </div>
+
 
       {/* Add Trip Drawer */}
       <div className={`drawer-overlay ${isAddDrawerOpen ? 'open' : ''}`} onClick={() => setIsAddDrawerOpen(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(5px)', zIndex: 1000, opacity: isAddDrawerOpen ? 1 : 0, pointerEvents: isAddDrawerOpen ? 'auto' : 'none', transition: 'opacity 0.3s' }}>

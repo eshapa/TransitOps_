@@ -155,7 +155,6 @@ const FuelExpenses = () => {
     <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
       <div className="page-header">
         <h1 className="page-title">Fuel & Expenses</h1>
-<<<<<<< HEAD
         <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {anomaliesData.totalAnomalies > 0 && (
             <button className="btn-secondary-custom" onClick={() => setIsAnomaliesDrawerOpen(true)} style={{ background: 'rgba(220,53,69,0.1)', border: '1px solid rgba(220,53,69,0.5)', color: '#ff6b6b' }}>
