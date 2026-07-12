@@ -1,40 +1,8 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FiBarChart2, FiDownload, FiTruck, FiActivity, FiDollarSign } from 'react-icons/fi';
 import './TripManagement.css'; // Reuses styles
-=======
-import React from 'react';
-import { FiDownload, FiFileText, FiTrendingUp, FiTrendingDown, FiCheckCircle } from 'react-icons/fi';
-import { BiLeaf } from 'react-icons/bi';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
-import './Reports.css';
-
-const revenueData = [
-  { name: 'Jan', revenue: 4000, expenses: 2400 },
-  { name: 'Feb', revenue: 3000, expenses: 1398 },
-  { name: 'Mar', revenue: 2000, expenses: 9800 },
-  { name: 'Apr', revenue: 2780, expenses: 3908 },
-  { name: 'May', revenue: 1890, expenses: 4800 },
-  { name: 'Jun', revenue: 2390, expenses: 3800 },
-  { name: 'Jul', revenue: 3490, expenses: 4300 },
-];
-
-const leaderboard = [
-  { id: 'FLT-9821-X', type: 'Freightliner Cascadia', util: 98, rev: '$12,400', status: 'Optimal', trend: 'up' },
-  { id: 'FLT-7740-Y', type: 'Peterbilt 579', util: 92, rev: '$10,150', status: 'Optimal', trend: 'up' },
-  { id: 'FLT-4412-Z', type: 'Volvo VNL 860', util: 64, rev: '$6,800', status: 'Pending', trend: 'down' },
-];
->>>>>>> 12846b3 (made maintance page and report)
 
 const Reports = () => {
   const { user } = useAuth();
@@ -123,7 +91,6 @@ const Reports = () => {
   }
 
   return (
-<<<<<<< HEAD
     <div className="reports-analytics" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', overflowY: 'auto' }}>
       <div className="page-header" style={{ marginBottom: 0 }}>
         <h1 className="page-title">Reports & Analytics</h1>
@@ -249,35 +216,6 @@ const Reports = () => {
               </tbody>
             </table>
           )}
-=======
-    <div className="reports-container">
-      <div className="reports-header">
-        <div className="reports-title-col">
-          <h1>Executive Analytics</h1>
-          <p>Performance monitoring for Q3 FY2024 • Updated 4m ago</p>
-        </div>
-        <div className="reports-actions">
-          <button className="btn-outline-custom"><FiDownload /> CSV Export</button>
-          <button className="btn-outline-custom"><FiFileText /> PDF Report</button>
-          <button className="btn-outline-custom">Last 30 Days</button>
-        </div>
-      </div>
-
-      <div className="kpi-cards-row">
-        {/* Card 1 */}
-        <div className="kpi-card glass-panel">
-          <div className="kpi-header">
-            <span className="kpi-label">TOTAL FLEET ROI</span>
-            <span className="kpi-trend trend-up"><FiTrendingUp /> 12.4%</span>
-          </div>
-          <h2 className="kpi-value">$2.48M</h2>
-          <div className="kpi-progress-container">
-            <div className="kpi-progress-bg">
-              <div className="kpi-progress-fill" style={{ width: '78%' }}></div>
-            </div>
-            <p className="kpi-desc">78% of target revenue achieved</p>
-          </div>
->>>>>>> 12846b3 (made maintance page and report)
         </div>
 
         {/* Card 2 */}
