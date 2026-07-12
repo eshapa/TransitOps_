@@ -484,7 +484,8 @@ const FuelExpenses = () => {
               <button type="submit" className="btn-primary-custom" style={{ flex: 1 }}>Record Expense</button>
             </div>
           </form>
-
+        </div>
+      </div>
 
       {/* Anomalies Drawer */}
       <div className={`drawer-overlay ${isAnomaliesDrawerOpen ? 'open' : ''}`} onClick={() => setIsAnomaliesDrawerOpen(false)}>
