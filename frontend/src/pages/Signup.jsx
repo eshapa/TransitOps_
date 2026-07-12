@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FiAlertCircle } from 'react-icons/fi';
 import './AuthForm.css';
 
 const Signup = () => {
@@ -8,13 +9,19 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Dispatcher');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    login({ name: fullName, email, role });
-    navigate('/');
+    setError('');
+    try {
+      await signup(fullName, email, password, role);
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -33,6 +40,7 @@ const Signup = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
+            autoComplete="name"
             className="auth-input"
           />
         </div>
@@ -45,6 +53,7 @@ const Signup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className="auth-input"
           />
         </div>
@@ -57,6 +66,7 @@ const Signup = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="new-password"
             className="auth-input"
           />
         </div>
@@ -80,6 +90,13 @@ const Signup = () => {
         <button type="submit" className="btn-auth-primary">
           Sign Up
         </button>
+
+        {error && (
+          <div className="auth-error-state">
+            <FiAlertCircle className="error-icon" />
+            <span>{error}</span>
+          </div>
+        )}
       </form>
 
       <div className="auth-switch" style={{ marginTop: '2rem' }}>

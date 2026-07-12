@@ -39,6 +39,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async (fullName, email, password, roleName) => {
+    try {
+      const response = await API.post('/auth/register', { fullName, email, password, roleName });
+      const { token, user: userData } = response.data;
+      
+      localStorage.setItem('transitops_token', token);
+      localStorage.setItem('transitops_user', JSON.stringify(userData));
+      setUser(userData);
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.error?.message || 'Registration failed. Please try again.';
+      throw new Error(message);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('transitops_token');
@@ -50,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

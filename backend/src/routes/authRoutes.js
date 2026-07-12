@@ -30,7 +30,28 @@ const loginSchema = Joi.object({
   })
 });
 
+// Register schema validation
+const registerSchema = Joi.object({
+  fullName: Joi.string().min(2).max(100).required().messages({
+    'any.required': 'Full Name is required.'
+  }),
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format.',
+    'any.required': 'Email is required.'
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Password must be at least 6 characters.',
+    'any.required': 'Password is required.'
+  }),
+  roleName: Joi.string().valid('Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst', 'Driver').required().messages({
+    'any.required': 'Role is required.'
+  })
+});
+
 // Apply rate limiter and validation to the login route
 router.post('/login', loginLimiter, validateRequest(loginSchema), authController.login);
+
+// Mount register route
+router.post('/register', validateRequest(registerSchema), authController.register);
 
 module.exports = router;

@@ -289,6 +289,21 @@ async function seed() {
       console.log('Users already exist, skipping seeding.');
     }
 
+    console.log('Seeding default vehicles...');
+    const [existingVehicles] = await connection.query('SELECT * FROM vehicles LIMIT 1');
+    if (existingVehicles.length === 0) {
+      await connection.query(`
+        INSERT INTO vehicles (registration_number, vehicle_name, vehicle_model, vehicle_type, maximum_load_capacity, current_odometer, acquisition_cost, status) VALUES
+        ('GJ01AB4521', 'VAN-05', 'VAN-05', 'Van', 500.00, 74000.00, 620000.00, 'Available'),
+        ('GJ01AB9981', 'TRUCK-11', 'TRUCK-11', 'Truck', 5000.00, 182000.00, 2450000.00, 'On Trip'),
+        ('GJ01AB1120', 'MINI-03', 'MINI-03', 'Mini', 1000.00, 66000.00, 410000.00, 'In Shop'),
+        ('GJ01AB0008', 'VAN-09', 'VAN-09', 'Van', 750.00, 241900.00, 590000.00, 'Retired')
+      `);
+      console.log('Vehicles seeded.');
+    } else {
+      console.log('Vehicles already exist, skipping vehicle seeding.');
+    }
+
     console.log('Database schema and seeding completed successfully!');
   } catch (error) {
     console.error('Seeding failed:', error);

@@ -72,6 +72,77 @@ async function login(req, res, next) {
   }
 }
 
+async function register(req, res, next) {
+  const { fullName, email, password, roleName } = req.body;
+
+  try {
+    // Map role names if they differ
+    let targetRole = roleName || 'Driver';
+    if (targetRole === 'Dispatcher') {
+      targetRole = 'Driver';
+    }
+
+    // Check if user already exists
+    const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'User with this email already exists.' }
+      });
+    }
+
+    // Lookup role ID
+    const [roles] = await pool.execute('SELECT id, name FROM roles WHERE name = ?', [targetRole]);
+    if (roles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { message: `Role '${targetRole}' is invalid.` }
+      });
+    }
+
+    const roleId = roles[0].id;
+    const resolvedRoleName = roles[0].name;
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert user
+    const [result] = await pool.execute(`
+      INSERT INTO users (full_name, email, password_hash, role_id, status)
+      VALUES (?, ?, ?, ?, 'Active')
+    `, [fullName, email, hashedPassword, roleId]);
+
+    const newUserId = result.insertId;
+
+    // Generate JWT
+    const token = jwt.sign(
+      {
+        id: newUserId,
+        email: email,
+        roleName: resolvedRoleName
+      },
+      process.env.JWT_SECRET || 'transitops_super_secret_jwt_key_2026',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+      token,
+      user: {
+        id: newUserId,
+        fullName,
+        email,
+        role: resolvedRoleName
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  login
+  login,
+  register
 };
