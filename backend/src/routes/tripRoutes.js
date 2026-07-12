@@ -41,9 +41,11 @@ router.use(authMiddleware);
 router.get('/', tripController.getAllTrips);
 router.get('/:id', tripController.getTripById);
 
-// Driver & Fleet Manager actions
-router.post('/', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCreateSchema), tripController.createTrip);
-router.put('/:id/dispatch', authorizeRoles('Fleet Manager', 'Driver'), tripController.dispatchTrip);
+// Trip creation & dispatch (Fleet Manager only)
+router.post('/', authorizeRoles('Fleet Manager'), validateRequest(tripCreateSchema), tripController.createTrip);
+router.put('/:id/dispatch', authorizeRoles('Fleet Manager'), tripController.dispatchTrip);
+
+// Trip status updates (Driver & Fleet Manager)
 router.put('/:id/complete', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCompleteSchema), tripController.completeTrip);
 router.put('/:id/cancel', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCancelSchema), tripController.cancelTrip);
 

@@ -206,6 +206,15 @@ async function updateDriver(req, res, next) {
     const oldDriver = oldDrivers[0];
     const userId = oldDriver.user_id;
 
+    // Safety score change must strictly be restricted to Safety Officer only
+    if (safety_score !== undefined && req.user.roleName !== 'Safety Officer') {
+      await connection.rollback();
+      return res.status(403).json({
+        success: false,
+        error: { message: 'Only Safety Officers are authorized to change safety scores.' }
+      });
+    }
+
     // 2. Validate email uniqueness
     if (email && email !== oldDriver.email) {
       const [existingUser] = await connection.execute('SELECT id FROM users WHERE email = ? AND id != ?', [email, userId]);
@@ -287,9 +296,99 @@ async function updateDriver(req, res, next) {
   }
 }
 
+// Self-update for drivers (own status and personal info only)
+async function selfUpdateDriver(req, res, next) {
+  const { full_name, email, phone, status } = req.body;
+
+  // Only allow Available or Off Duty for self-update (no Suspended self-assign)
+  if (status && !['Available', 'Off Duty'].includes(status)) {
+    return res.status(403).json({
+      success: false,
+      error: { message: 'Drivers can only set their status to Available or Off Duty.' }
+    });
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Find the driver record linked to the logged-in user
+    const [drivers] = await connection.execute(`
+      SELECT d.id as driver_id, d.user_id, u.full_name, u.email, u.phone, u.status as user_status,
+             d.license_number, d.license_category, d.license_expiry, d.safety_score,
+             d.joining_date, d.total_trips, d.status as driver_status
+      FROM drivers d
+      JOIN users u ON d.user_id = u.id
+      WHERE d.user_id = ?
+    `, [req.user.id]);
+
+    if (drivers.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        success: false,
+        error: { message: 'Driver profile not found for current user.' }
+      });
+    }
+
+    const driver = drivers[0];
+    const oldDriver = { ...driver };
+
+    // Update users table (personal info)
+    const userUpdates = [];
+    const userParams = [];
+    if (full_name !== undefined) { userUpdates.push('full_name = ?'); userParams.push(full_name); }
+    if (email !== undefined) {
+      // Check uniqueness
+      const [existing] = await connection.execute('SELECT id FROM users WHERE email = ? AND id != ?', [email, driver.user_id]);
+      if (existing.length > 0) {
+        await connection.rollback();
+        return res.status(400).json({ success: false, error: { message: 'Email already in use.' } });
+      }
+      userUpdates.push('email = ?'); userParams.push(email);
+    }
+    if (phone !== undefined) { userUpdates.push('phone = ?'); userParams.push(phone); }
+
+    if (userUpdates.length > 0) {
+      userParams.push(driver.user_id);
+      await connection.execute(`UPDATE users SET ${userUpdates.join(', ')} WHERE id = ?`, userParams);
+    }
+
+    // Update drivers table (status only)
+    if (status) {
+      await connection.execute('UPDATE drivers SET status = ? WHERE id = ?', [status, driver.driver_id]);
+    }
+
+    // Fetch updated state
+    const [updated] = await connection.execute(`
+      SELECT d.id as driver_id, d.user_id, u.full_name, u.email, u.phone, u.status as user_status,
+             d.license_number, d.license_category, d.license_expiry, d.safety_score,
+             d.joining_date, d.total_trips, d.status as driver_status
+      FROM drivers d
+      JOIN users u ON d.user_id = u.id
+      WHERE d.id = ?
+    `, [driver.driver_id]);
+
+    await auditLog(connection, req.user.id, 'Drivers', 'SELF_UPDATE', driver.driver_id, oldDriver, updated[0]);
+    await connection.commit();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      data: updated[0]
+    });
+
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
   getAllDrivers,
   getDriverById,
   createDriver,
-  updateDriver
+  updateDriver,
+  selfUpdateDriver
 };
