@@ -304,6 +304,38 @@ async function seed() {
       console.log('Vehicles already exist, skipping vehicle seeding.');
     }
 
+    console.log('Seeding default maintenance logs...');
+    const [existingLogs] = await connection.query('SELECT * FROM maintenance LIMIT 1');
+    if (existingLogs.length === 0) {
+      const [seededVehicles] = await connection.query('SELECT id, registration_number FROM vehicles');
+      const vehMap = {};
+      seededVehicles.forEach(v => { vehMap[v.registration_number] = v.id; });
+
+      if (vehMap['GJ01AB1120']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, cost, start_date, status) VALUES
+          (?, 'Engine Diagnostic', 'Check engine warning light and scan codes', 'Speedy Repairs', 180.00, '2026-07-10', 'In Progress')
+        `, [vehMap['GJ01AB1120']]);
+      }
+
+      if (vehMap['GJ01AB4521']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, cost, start_date, completion_date, status) VALUES
+          (?, 'Oil Change', 'Regular engine oil and filter change', 'Quick Lube', 45.00, '2026-07-05', '2026-07-05', 'Completed')
+        `, [vehMap['GJ01AB4521']]);
+      }
+
+      if (vehMap['GJ01AB0008']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, start_date, status) VALUES
+          (?, 'Brake Inspection', 'Annual brake pad wear check', 'Brake Masters', '2026-07-15', 'Scheduled')
+        `, [vehMap['GJ01AB0008']]);
+      }
+      console.log('Maintenance logs seeded.');
+    } else {
+      console.log('Maintenance logs already exist, skipping seeding.');
+    }
+
     console.log('Database schema and seeding completed successfully!');
   } catch (error) {
     console.error('Seeding failed:', error);
