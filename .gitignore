@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment configurations
+.env
+backend/.env
+frontend/.env
+
+# Local test scripts
+backend/src/test/
+*.log
+
+# Editor configurations & system files
+.DS_Store
+.vscode/
+.idea/

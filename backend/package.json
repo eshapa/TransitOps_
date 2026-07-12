@@ -1,0 +1,33 @@
+{
+  "name": "transitops-backend",
+  "version": "1.0.0",
+  "description": "Secure backend for TransitOps",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "seed": "node src/config/seed.js",
+    "test:phase1": "node src/test/verify-phase1.js",
+    "test:phase2": "node src/test/verify-phase2.js",
+    "test:phase3": "node src/test/verify-phase3.js",
+    "test:phase4": "node src/test/verify-phase4.js",
+    "test:phase5": "node src/test/verify-phase5.js",
+    "test:phase6": "node src/test/verify-phase6.js",
+    "test:phase7": "node src/test/verify-phase7.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "joi": "^17.13.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.9.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "private": true
+}
