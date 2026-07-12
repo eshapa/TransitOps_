@@ -42,9 +42,9 @@ router.get('/', tripController.getAllTrips);
 router.get('/:id', tripController.getTripById);
 
 // Driver & Fleet Manager actions
-router.post('/', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCreateSchema), tripController.createTrip);
-router.put('/:id/dispatch', authorizeRoles('Fleet Manager', 'Driver'), tripController.dispatchTrip);
-router.put('/:id/complete', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCompleteSchema), tripController.completeTrip);
-router.put('/:id/cancel', authorizeRoles('Fleet Manager', 'Driver'), validateRequest(tripCancelSchema), tripController.cancelTrip);
+router.post('/', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), validateRequest(tripCreateSchema), tripController.createTrip);
+router.put('/:id/dispatch', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), tripController.dispatchTrip);
+router.put('/:id/complete', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), validateRequest(tripCompleteSchema), tripController.completeTrip);
+router.put('/:id/cancel', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), validateRequest(tripCancelSchema), tripController.cancelTrip);
 
 module.exports = router;

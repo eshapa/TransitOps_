@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import './AuthForm.css';
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('Dispatcher');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    login({ name: fullName, email, role });
-    navigate('/');
+    setError('');
+    setLoading(true);
+    try {
+      await signup(fullName, email, password, role);
+      // Registration complete, navigate to login
+      navigate('/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,6 +47,7 @@ const Signup = () => {
             onChange={(e) => setFullName(e.target.value)}
             required
             className="auth-input"
+            disabled={loading}
           />
         </div>
 
@@ -46,19 +60,32 @@ const Signup = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="auth-input"
+            disabled={loading}
           />
         </div>
 
         <div className="form-group">
           <label>PASSWORD</label>
-          <input 
-            type="password" 
-            placeholder="••••••••" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="auth-input"
-          />
+          <div className="password-input-wrapper">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="auth-input"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              disabled={loading}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
+          </div>
         </div>
 
         <div className="form-group">
@@ -68,18 +95,27 @@ const Signup = () => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="auth-input custom-select"
+              disabled={loading}
             >
               <option value="Fleet Manager">Fleet Manager</option>
               <option value="Dispatcher">Dispatcher</option>
               <option value="Safety Officer">Safety Officer</option>
               <option value="Financial Analyst">Financial Analyst</option>
+              <option value="Driver">Driver</option>
             </select>
           </div>
         </div>
 
-        <button type="submit" className="btn-auth-primary">
-          Sign Up
+        <button type="submit" className="btn-auth-primary" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Sign Up'}
         </button>
+
+        {error && (
+          <div className="auth-error-state">
+            <FiAlertCircle className="error-icon" />
+            <span>{error}</span>
+          </div>
+        )}
       </form>
 
       <div className="auth-switch" style={{ marginTop: '2rem' }}>
@@ -90,3 +126,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

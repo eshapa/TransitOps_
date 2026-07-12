@@ -16,3 +16,6 @@ backend/src/test/
 .DS_Store
 .vscode/
 .idea/
+
+# PDF Documents
+TransitOps Smart Transport Operations Platform.pdf

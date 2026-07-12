@@ -230,19 +230,21 @@ async function seed() {
     try { await connection.query('CREATE INDEX idx_maintenance_vehicle ON maintenance(vehicle_id);'); } catch (e) {}
 
     console.log('Seeding roles...');
-    const [roles] = await connection.query('SELECT * FROM roles');
-    if (roles.length === 0) {
-      await connection.query(`
-        INSERT INTO roles (name, description) VALUES
-        ('Fleet Manager', 'Manages vehicles and fleet'),
-        ('Driver', 'Driver role'),
-        ('Safety Officer', 'Monitors driver compliance'),
-        ('Financial Analyst', 'Expense and analytics');
-      `);
-      console.log('Roles seeded.');
-    } else {
-      console.log('Roles already seeded.');
+    const defaultRoles = [
+      { name: 'Fleet Manager', description: 'Manages vehicles and fleet' },
+      { name: 'Driver', description: 'Driver role' },
+      { name: 'Safety Officer', description: 'Monitors driver compliance' },
+      { name: 'Financial Analyst', description: 'Expense and analytics' },
+      { name: 'Dispatcher', description: 'Manages dispatching and trips' }
+    ];
+    for (const r of defaultRoles) {
+      const [existing] = await connection.query('SELECT id FROM roles WHERE name = ?', [r.name]);
+      if (existing.length === 0) {
+        await connection.query('INSERT INTO roles (name, description) VALUES (?, ?)', [r.name, r.description]);
+        console.log(`Role '${r.name}' seeded.`);
+      }
     }
+
 
     console.log('Seeding default users...');
     const [existingUsers] = await connection.query('SELECT * FROM users LIMIT 1');

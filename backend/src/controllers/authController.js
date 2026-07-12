@@ -72,6 +72,77 @@ async function login(req, res, next) {
   }
 }
 
+async function register(req, res, next) {
+  const { fullName, email, password, role } = req.body;
+
+  try {
+    // 1. Check if user already exists
+    const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Email is already registered.' }
+      });
+    }
+
+    // 2. Fetch role_id
+    const [roles] = await pool.execute('SELECT id FROM roles WHERE name = ?', [role]);
+    if (roles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid role selected.' }
+      });
+    }
+    const roleId = roles[0].id;
+
+    // 3. Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // 4. If role is Driver, insert both user & driver inside database transaction
+    if (role === 'Driver') {
+      const connection = await pool.getConnection();
+      try {
+        await connection.beginTransaction();
+
+        const [userResult] = await connection.execute(
+          'INSERT INTO users (role_id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)',
+          [roleId, fullName, email, passwordHash, 'Active']
+        );
+        const userId = userResult.insertId;
+
+        // Generate a random license number for self-registration: "REG-xxxxxxx"
+        const licenseNumber = `REG-${Math.floor(1000000 + Math.random() * 9000000)}`;
+        await connection.execute(
+          'INSERT INTO drivers (user_id, license_number, license_category, license_expiry, joining_date, status) VALUES (?, ?, ?, ?, ?, ?)',
+          [userId, licenseNumber, 'Commercial', '2030-12-31', new Date().toISOString().split('T')[0], 'Available']
+        );
+
+        await connection.commit();
+      } catch (err) {
+        await connection.rollback();
+        throw err;
+      } finally {
+        connection.release();
+      }
+    } else {
+      // Create user only
+      await pool.execute(
+        'INSERT INTO users (role_id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)',
+        [roleId, fullName, email, passwordHash, 'Active']
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful'
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  login
+  login,
+  register
 };
+
