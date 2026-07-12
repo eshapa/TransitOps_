@@ -57,6 +57,12 @@ ul {
   margin: 0;
 }
 
+/* Fix native dropdown option styling on Windows/Chrome */
+select option {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+}
+
 /* Glassmorphism Utility Classes */
 .glass-card {
   background: var(--glass-bg);

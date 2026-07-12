@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
-import { FiDollarSign, FiPlus, FiX } from 'react-icons/fi';
+import { FiDollarSign, FiPlus, FiX, FiAlertCircle } from 'react-icons/fi';
 import './TripManagement.css'; // Reuse table/drawer overlay classes
 
 const FuelExpenses = () => {
@@ -15,6 +15,9 @@ const FuelExpenses = () => {
   // Drawer states
   const [isFuelDrawerOpen, setIsFuelDrawerOpen] = useState(false);
   const [isExpenseDrawerOpen, setIsExpenseDrawerOpen] = useState(false);
+  const [isAnomaliesDrawerOpen, setIsAnomaliesDrawerOpen] = useState(false);
+  
+  const [anomaliesData, setAnomaliesData] = useState({ data: [], totalAnomalies: 0, highRisk: 0, mediumRisk: 0, lowRisk: 0, fleetAvgKmPerL: 0 });
   
   const [formError, setFormError] = useState('');
 
@@ -53,6 +56,9 @@ const FuelExpenses = () => {
 
       const tripRes = await API.get('/trips');
       setTrips(tripRes.data.data.filter(t => t.status === 'Dispatched' || t.status === 'Completed'));
+
+      const anomRes = await API.get('/fuel/anomalies');
+      setAnomaliesData(anomRes.data);
     } catch (err) {
       setError(err.response?.data?.error?.message || 'Failed to load financial records.');
     } finally {
@@ -148,7 +154,17 @@ const FuelExpenses = () => {
     <div className="financial-dashboard" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', overflowY: 'auto' }}>
       <div className="page-header" style={{ marginBottom: 0 }}>
         <h1 className="page-title">Fuel & Expenses</h1>
-        <div className="header-actions" style={{ display: 'flex', gap: '1rem' }}>
+        <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {anomaliesData.totalAnomalies > 0 && (
+            <button className="btn-secondary-custom" onClick={() => setIsAnomaliesDrawerOpen(true)} style={{ background: 'rgba(220,53,69,0.1)', border: '1px solid rgba(220,53,69,0.5)', color: '#ff6b6b' }}>
+              <FiAlertCircle style={{ marginRight: '6px' }} /> 
+              {anomaliesData.highRisk > 0 ? (
+                 <span style={{fontWeight: 'bold'}}>{anomaliesData.highRisk} High Risk</span>
+              ) : (
+                 <span>{anomaliesData.totalAnomalies} Anomalies</span>
+              )}
+            </button>
+          )}
           <button className="btn-secondary-custom" onClick={() => setIsFuelDrawerOpen(true)}>
             <FiPlus /> Log Fuel
           </button>
@@ -467,6 +483,97 @@ const FuelExpenses = () => {
               <button type="submit" className="btn-primary-custom" style={{ flex: 1 }}>Record Expense</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* Anomalies Drawer */}
+      <div className={`drawer-overlay ${isAnomaliesDrawerOpen ? 'open' : ''}`} onClick={() => setIsAnomaliesDrawerOpen(false)}>
+        <div className={`drawer-panel ${isAnomaliesDrawerOpen ? 'open' : ''}`} onClick={e => e.stopPropagation()} style={{ width: '600px', right: isAnomaliesDrawerOpen ? '0' : '-600px', display: 'flex', flexDirection: 'column' }}>
+          <div className="drawer-header" style={{ background: 'rgba(220,53,69,0.1)', borderBottom: '1px solid rgba(220,53,69,0.2)' }}>
+            <h2 style={{ color: '#ff6b6b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FiAlertCircle /> Fuel Anomalies Detected
+            </h2>
+            <button className="icon-btn" onClick={() => setIsAnomaliesDrawerOpen(false)} style={{ color: '#ff6b6b' }}><FiX /></button>
+          </div>
+          
+          <div className="drawer-content" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-primary)' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+              <div className="glass-panel" style={{ flex: 1, padding: '1rem', textAlign: 'center', border: '1px solid rgba(220,53,69,0.3)', background: 'rgba(220,53,69,0.05)' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ff6b6b' }}>{anomaliesData.highRisk}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>High Risk</div>
+              </div>
+              <div className="glass-panel" style={{ flex: 1, padding: '1rem', textAlign: 'center', border: '1px solid rgba(255,193,7,0.3)', background: 'rgba(255,193,7,0.05)' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f1c40f' }}>{anomaliesData.mediumRisk}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Medium Risk</div>
+              </div>
+              <div className="glass-panel" style={{ flex: 1, padding: '1rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{anomaliesData.fleetAvgKmPerL}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Fleet Avg km/L</div>
+              </div>
+            </div>
+
+            {anomaliesData.data.length === 0 ? (
+              <div className="text-center p-4 text-muted-custom">No anomalies detected in recent fuel logs.</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {anomaliesData.data.map((anomaly, idx) => {
+                  let badgeColor = 'var(--text-secondary)';
+                  let badgeBg = 'rgba(255,255,255,0.1)';
+                  if (anomaly.severity === 'high') { badgeColor = '#ff6b6b'; badgeBg = 'rgba(220,53,69,0.1)'; }
+                  if (anomaly.severity === 'medium') { badgeColor = '#f1c40f'; badgeBg = 'rgba(255,193,7,0.1)'; }
+                  
+                  return (
+                    <div key={idx} className="glass-panel" style={{ padding: '1.2rem', borderLeft: `4px solid ${badgeColor}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'flex-start' }}>
+                        <div>
+                          <strong style={{ fontSize: '1.1rem' }}>{anomaly.registration_number}</strong>
+                          <span style={{ marginLeft: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {new Date(anomaly.filled_date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <span style={{ 
+                          padding: '0.3rem 0.6rem', 
+                          borderRadius: '4px', 
+                          fontSize: '0.75rem', 
+                          background: badgeBg,
+                          color: badgeColor,
+                          fontWeight: 'bold',
+                          textTransform: 'uppercase'
+                        }}>
+                          {anomaly.severity} Risk
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                        <div><span style={{ color: 'var(--text-secondary)' }}>Liters:</span> {anomaly.liters} L</div>
+                        <div><span style={{ color: 'var(--text-secondary)' }}>Cost:</span> ${anomaly.total_cost}</div>
+                        <div><span style={{ color: 'var(--text-secondary)' }}>Station:</span> {anomaly.fuel_station || 'Unknown'}</div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {anomaly.flags.map((flag, fIdx) => (
+                          <div key={fIdx} style={{ 
+                            background: 'rgba(0,0,0,0.2)', 
+                            padding: '0.8rem', 
+                            borderRadius: '6px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                          }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <FiAlertCircle size={14} style={{ 
+                                color: flag.severity === 'high' ? '#ff6b6b' : flag.severity === 'medium' ? '#f1c40f' : 'var(--text-secondary)' 
+                              }}/>
+                              {flag.rule}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{flag.detail}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
