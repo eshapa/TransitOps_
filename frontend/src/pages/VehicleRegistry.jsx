@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -119,10 +120,102 @@ const VehicleRegistry = () => {
       default: return 'primary';
     }
   };
+=======
+import React, { useState } from 'react';
+import { FiCamera, FiEdit2, FiDownload, FiCheckCircle } from 'react-icons/fi';
+import './VehicleRegistry.css';
+
+const vehicles = [
+  {
+    id: 'v-904221',
+    regNumber: 'TX-9042-BR',
+    name: 'Freightliner Cascadia',
+    model: 'Model 2023',
+    vin: '...8921',
+    type: 'HEAVY TRUCK',
+    capacity: '45,000 lbs',
+    odometer: '124,500 mi',
+    fuelCapacity: '200 Gallons',
+    avgConsumption: '7.2 MPG',
+    image: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    insurance: [
+      { name: 'Liability_Cert_2024.pdf', expires: 'Dec 12, 2024' },
+      { name: 'Safety_Inspection_Q1.pdf', status: 'Verified', date: 'Mar 2024' }
+    ],
+    maintenance: [
+      {
+        title: 'Standard Oil Change & Filter',
+        date: 'May 15, 2024',
+        mileage: '122,100 mi',
+        desc: 'Full synthetic change, replaced air filter and checked tire pressure. All clear.',
+        type: 'completed'
+      },
+      {
+        title: 'Brake Pad Replacement (Front)',
+        date: 'Feb 02, 2024',
+        mileage: '115,400 mi',
+        desc: '',
+        type: 'past'
+      },
+      {
+        title: 'Annual Comprehensive Inspection',
+        date: 'Nov 28, 2023',
+        mileage: '108,000 mi',
+        desc: '',
+        type: 'past'
+      }
+    ]
+  },
+  {
+    id: 'v-904222',
+    regNumber: 'VN-2210-MK',
+    name: 'Mercedes Sprinter',
+    model: 'Model 2024',
+    vin: '...4432',
+    type: 'DELIVERY VAN',
+    capacity: '3,500 lbs',
+    odometer: '12,180 mi'
+  },
+  {
+    id: 'v-904223',
+    regNumber: 'TX-4491-LT',
+    name: 'Volvo FH16',
+    model: 'Model 2022',
+    vin: '...1102',
+    type: 'HEAVY TRUCK',
+    capacity: '42,000 lbs',
+    odometer: '234,010 mi'
+  },
+  {
+    id: 'v-904224',
+    regNumber: 'TR-1100-XP',
+    name: 'Scania R-Series',
+    model: 'Model 2023',
+    vin: '...5567',
+    type: 'HEAVY TRUCK',
+    capacity: '48,000 lbs',
+    odometer: '89,240 mi'
+  },
+  {
+    id: 'v-904225',
+    regNumber: 'EV-9004-QQ',
+    name: 'Rivian EDV',
+    model: 'Model 2024',
+    vin: '...2231',
+    type: 'ELECTRIC EV',
+    capacity: '2,800 lbs',
+    odometer: '5,400 mi'
+  }
+];
+
+const VehicleRegistry = () => {
+  const [activeVehicle, setActiveVehicle] = useState(vehicles[0]);
+>>>>>>> 12846b3 (made maintance page and report)
 
   const isFleetManager = user?.role === 'Fleet Manager';
 
   return (
+<<<<<<< HEAD
     <div className="vehicle-registry">
       <div className="page-header">
         <h1 className="page-title">Vehicle Registry</h1>
@@ -215,9 +308,58 @@ const VehicleRegistry = () => {
               </tbody>
             </table>
           )}
-        </div>
+=======
+    <div className="registry-container">
+      <div className="registry-header">
+        <h1>Vehicle Registry</h1>
+        <p>Manage and monitor 124 active enterprise assets</p>
       </div>
 
+      <div className="registry-content">
+        {/* Left Side: Table */}
+        <div className="registry-table-wrapper">
+          <table className="registry-table">
+            <thead>
+              <tr>
+                <th>REG. NUMBER</th>
+                <th>VEHICLE DETAILS</th>
+                <th>TYPE</th>
+                <th>CAPACITY</th>
+                <th>ODOMETER</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vehicles.map((v) => (
+                <tr 
+                  key={v.id} 
+                  className={activeVehicle.id === v.id ? 'active-row' : ''}
+                  onClick={() => setActiveVehicle(v)}
+                >
+                  <td className="reg-col">{v.regNumber}</td>
+                  <td>
+                    <div className="veh-name">{v.name}</div>
+                    <div className="veh-subtext">{v.model} • VIN: {v.vin}</div>
+                  </td>
+                  <td>
+                    <span className="type-badge">
+                      {v.type.split(' ').map((word, i) => (
+                        <span key={i} className="type-word">{word}</span>
+                      ))}
+                    </span>
+                  </td>
+                  <td>{v.capacity}</td>
+                  <td className="odo-text">{v.odometer}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="table-footer">
+            Showing 1-10 of 124 entries
+          </div>
+>>>>>>> 12846b3 (made maintance page and report)
+        </div>
+
+<<<<<<< HEAD
       {/* Vehicle Details Drawer */}
       <div className={`drawer-overlay ${selectedVehicle ? 'open' : ''}`} onClick={() => setSelectedVehicle(null)}>
         <div className={`drawer-panel ${selectedVehicle ? 'open' : ''}`} onClick={e => e.stopPropagation()}>
@@ -276,6 +418,89 @@ const VehicleRegistry = () => {
               </div>
             </>
           )}
+=======
+        {/* Right Side: Detail Panel */}
+        <div className="registry-detail-panel">
+          <div className="panel-header">
+            <div className="asset-status">
+              <span className="status-indicator"></span>
+              <span className="status-text">ACTIVE ASSET</span>
+              <span className="asset-id">ID: {activeVehicle.id}</span>
+            </div>
+            <h2 className="detail-name">{activeVehicle.name}</h2>
+            <p className="detail-reg">{activeVehicle.regNumber}</p>
+          </div>
+
+          <div className="asset-image-container">
+            <img src={activeVehicle.image || 'https://images.unsplash.com/photo-1593955681123-5e937d57fb4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt="Vehicle" />
+            <div className="image-actions">
+              <button className="img-btn"><FiCamera /></button>
+              <button className="img-btn"><FiEdit2 /></button>
+            </div>
+          </div>
+
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <span className="metric-label">FUEL CAPACITY</span>
+              <div className="metric-value">
+                <span className="big-val">{activeVehicle.fuelCapacity ? activeVehicle.fuelCapacity.split(' ')[0] : 'N/A'}</span>
+                <span className="small-val">{activeVehicle.fuelCapacity ? activeVehicle.fuelCapacity.split(' ')[1] : ''}</span>
+              </div>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">AVG CONSUMPTION</span>
+              <div className="metric-value">
+                <span className="big-val">{activeVehicle.avgConsumption ? activeVehicle.avgConsumption.split(' ')[0] : 'N/A'}</span>
+                <span className="small-val">{activeVehicle.avgConsumption ? activeVehicle.avgConsumption.split(' ')[1] : ''}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-block">
+            <div className="section-header">
+              <h3>Insurance & Compliance</h3>
+              <a href="#" className="view-all">View All</a>
+            </div>
+            <div className="docs-list">
+              {(activeVehicle.insurance || []).map((doc, i) => (
+                <div className="doc-card" key={i}>
+                  <div className="doc-icon">
+                    {doc.status === 'Verified' ? <FiCheckCircle /> : <div className="file-icon">📄</div>}
+                  </div>
+                  <div className="doc-info">
+                    <h4>{doc.name}</h4>
+                    <p>{doc.expires ? `Expires: ${doc.expires}` : `Status: ${doc.status} • ${doc.date}`}</p>
+                  </div>
+                  <button className="download-btn"><FiDownload /></button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="section-block">
+            <div className="section-header">
+              <h3>Maintenance History</h3>
+              <button className="schedule-btn">Schedule Task</button>
+            </div>
+            <div className="timeline">
+              {(activeVehicle.maintenance || []).map((maint, i) => (
+                <div className={`timeline-item ${maint.type}`} key={i}>
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-content">
+                    <h4>{maint.title}</h4>
+                    <span className="timeline-date">{maint.date} • {maint.mileage}</span>
+                    {maint.desc && <p className="timeline-desc">{maint.desc}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel-footer-actions">
+            <button className="btn-secondary">Edit Details</button>
+            <button className="btn-primary">Assign Driver</button>
+          </div>
+>>>>>>> 12846b3 (made maintance page and report)
         </div>
       </div>
 

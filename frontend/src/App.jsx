@@ -45,6 +45,7 @@ function App() {
               <Route path="dispatch" element={<DispatchCenter />} />
               <Route path="trips" element={<TripManagement />} />
               <Route path="maintenance" element={<Maintenance />} />
+              <Route path="fuel" element={<FuelExpenses />} />
               <Route path="expenses" element={<FuelExpenses />} />
               <Route path="reports" element={<Reports />} />
             </Route>

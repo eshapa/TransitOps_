@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FiPlus, FiX, FiCheck, FiPlay, FiTrash } from 'react-icons/fi';
 import './TripManagement.css'; // Let's make sure it is styled cleanly or uses shared classes.
+=======
+import React from 'react';
+import { FiArrowRight, FiMoreVertical, FiFilter } from 'react-icons/fi';
+import './TripManagement.css';
+>>>>>>> 12846b3 (made maintance page and report)
 
 const TripManagement = () => {
   const { user } = useAuth();
@@ -164,6 +170,7 @@ const TripManagement = () => {
   const canModify = user?.role === 'Fleet Manager' || user?.role === 'Driver';
 
   return (
+<<<<<<< HEAD
     <div className="trip-management" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="page-header" style={{ marginBottom: '1.5rem' }}>
         <h1 className="page-title">Trip Management</h1>
@@ -238,6 +245,217 @@ const TripManagement = () => {
               </tbody>
             </table>
           )}
+=======
+    <div className="trip-container">
+      <div className="trip-header">
+        <div className="trip-header-title">
+          <h1>Trip Management</h1>
+          <p>Real-time oversight of active logistical operations.</p>
+        </div>
+        <div className="view-toggles">
+          <button className="toggle-btn active">List View</button>
+          <button className="toggle-btn">Map View</button>
+        </div>
+      </div>
+
+      <div className="trip-layout">
+        {/* Main Content Column */}
+        <div className="trip-main-col">
+          {/* Active Trip Overview */}
+          <div className="active-trip-card glass-panel">
+            <div className="active-trip-content">
+              <span className="overline">ACTIVE TRIP ID</span>
+              <h2 className="trip-id">TRP-9482-TX</h2>
+              
+              <div className="trip-locations">
+                <div className="location-col">
+                  <span className="loc-label">ORIGIN</span>
+                  <h3 className="loc-city">Austin, TX</h3>
+                  <p className="loc-desc">Distribution Hub North</p>
+                </div>
+                <div className="location-col">
+                  <span className="loc-label">DESTINATION</span>
+                  <h3 className="loc-city">Denver, CO</h3>
+                  <p className="loc-desc">Logistics Center West</p>
+                </div>
+              </div>
+
+              <div className="trip-progress">
+                <div className="progress-labels">
+                  <span>Progress: 64%</span>
+                  <span className="miles-remaining">428 miles remaining</span>
+                </div>
+                <div className="progress-bar-bg">
+                  <div className="progress-bar-fill" style={{ width: '64%' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="active-trip-map">
+              <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Map View" />
+              <div className="eta-badge">EST. ARRIVAL: 04:30 PM</div>
+            </div>
+          </div>
+
+          {/* Associated Entities */}
+          <div className="trip-entities">
+            <div className="entity-card glass-panel">
+              <div className="entity-icon driver-avatar">
+                <img src="https://ui-avatars.com/api/?name=Elena+Rodriguez&background=random" alt="Driver" />
+              </div>
+              <div className="entity-info">
+                <span className="overline">DRIVER</span>
+                <h4>Elena Rodriguez</h4>
+                <p className="entity-meta">⭐ 4.9 • 8 years exp.</p>
+              </div>
+            </div>
+            
+            <div className="entity-card glass-panel">
+              <div className="entity-icon vehicle-icon">
+                🚚
+              </div>
+              <div className="entity-info">
+                <span className="overline">VEHICLE</span>
+                <h4>Peterbilt 579</h4>
+                <p className="entity-meta">VIN: ...8F2X0</p>
+              </div>
+            </div>
+
+            <div className="entity-card glass-panel">
+              <div className="entity-icon cargo-icon">
+                📦
+              </div>
+              <div className="entity-info">
+                <span className="overline">CARGO</span>
+                <h4>High-Precision ICs</h4>
+                <p className="entity-meta">Class 9 • 12,400 lbs</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Event Timeline */}
+          <div className="trip-timeline-card glass-panel">
+            <div className="timeline-header">
+              <h3>🕒 Event Timeline</h3>
+            </div>
+            <div className="event-timeline">
+              <div className="event-item">
+                <div className="event-dot dot-success"></div>
+                <div className="event-line"></div>
+                <div className="event-content">
+                  <div className="event-title-row">
+                    <h4>Checkpoint Passed: Dallas Hub</h4>
+                    <span className="event-time">10:24 AM</span>
+                  </div>
+                  <p>Automated RFID verification successful.</p>
+                </div>
+              </div>
+              
+              <div className="event-item">
+                <div className="event-dot dot-info"></div>
+                <div className="event-line"></div>
+                <div className="event-content">
+                  <div className="event-title-row">
+                    <h4>Fuel Stop: Amarillo E-Station</h4>
+                    <span className="event-time">08:15 AM</span>
+                  </div>
+                  <p>Added 450 kWh to reserves. Charge complete.</p>
+                </div>
+              </div>
+              
+              <div className="event-item">
+                <div className="event-dot dot-muted"></div>
+                <div className="event-content">
+                  <div className="event-title-row">
+                    <h4>Departure Austin Facility</h4>
+                    <span className="event-time">04:00 AM</span>
+                  </div>
+                  <p>Shift commenced. Pre-trip inspection passed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side Column */}
+        <div className="trip-side-col">
+          {/* Plan New Trip */}
+          <div className="plan-trip-card glass-panel">
+            <h3>Plan New Trip</h3>
+            <p>Assign assets and optimize routes with AI dispatching.</p>
+            <button className="btn-launch">
+              Launch Dispatcher <FiArrowRight />
+            </button>
+            <button className="btn-bulk">Bulk Import CSV</button>
+          </div>
+
+          {/* Active Fleet Status */}
+          <div className="fleet-status-card glass-panel">
+            <h3 className="overline">ACTIVE FLEET STATUS</h3>
+            <ul className="status-list">
+              <li>
+                <div className="status-label">
+                  <span className="status-dot dot-success"></span>
+                  In Transit
+                </div>
+                <span className="status-count">42</span>
+              </li>
+              <li>
+                <div className="status-label">
+                  <span className="status-dot dot-info"></span>
+                  Loading
+                </div>
+                <span className="status-count">18</span>
+              </li>
+              <li>
+                <div className="status-label">
+                  <span className="status-dot dot-warning"></span>
+                  Delayed
+                </div>
+                <span className="status-count">3</span>
+              </li>
+              <li>
+                <div className="status-label">
+                  <span className="status-dot dot-muted"></span>
+                  Staging
+                </div>
+                <span className="status-count">11</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Pending Dispatch */}
+          <div className="pending-dispatch-card glass-panel">
+            <div className="pending-header">
+              <h3 className="overline">PENDING DISPATCH</h3>
+              <span className="badge-new">8 NEW</span>
+            </div>
+            
+            <div className="pending-list">
+              <div className="pending-item">
+                <div className="pending-item-header">
+                  <span className="pending-id">#TRP-4491</span>
+                  <FiMoreVertical className="more-icon" />
+                </div>
+                <h4>Houston &rarr; San Jose</h4>
+                <p>Expedited Electronics Load</p>
+              </div>
+
+              <div className="pending-item">
+                <div className="pending-item-header">
+                  <span className="pending-id">#TRP-4482</span>
+                  <FiMoreVertical className="more-icon" />
+                </div>
+                <h4>Miami &rarr; Atlanta</h4>
+                <p>Standard Perishables</p>
+              </div>
+            </div>
+            
+            <button className="fab-filter">
+              <FiFilter />
+            </button>
+          </div>
+>>>>>>> 12846b3 (made maintance page and report)
         </div>
       </div>
 

@@ -9,37 +9,36 @@ import {
   FiTool, 
   FiDollarSign, 
   FiBarChart2, 
-  FiSettings, 
-  FiLogOut 
+  FiSettings
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const { user } = useAuth();
+  
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <FiPieChart /> },
     { name: 'Vehicle Registry', path: '/vehicles', icon: <FiTruck /> },
     { name: 'Driver Management', path: '/drivers', icon: <FiUsers /> },
-    { name: 'Dispatch Center', path: '/dispatch', icon: <FiMap /> },
-    { name: 'Trip Management', path: '/trips', icon: <FiList /> },
+    { name: 'Trip Management', path: '/trips', icon: <FiMap /> },
+    { name: 'Dispatch Center', path: '/dispatch', icon: <FiTool /> },
     { name: 'Maintenance', path: '/maintenance', icon: <FiTool /> },
-    { name: 'Fuel & Expenses', path: '/expenses', icon: <FiDollarSign /> },
-    { name: 'Reports', path: '/reports', icon: <FiBarChart2 /> },
+    { name: 'Fuel Logs', path: '/fuel', icon: <FiList /> },
+    { name: 'Expenses', path: '/expenses', icon: <FiDollarSign /> },
+    { name: 'Reports & Analytics', path: '/reports', icon: <FiBarChart2 /> },
   ];
 
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <div className="logo-icon">T</div>
-        <h2 className="logo-text">TransitOps</h2>
+        <div className="logo-icon-container">
+          <FiTruck className="brand-icon" />
+          <div>
+            <h2 className="logo-text">TransLogix Pro</h2>
+            <span className="logo-subtext">Enterprise Logistics</span>
+          </div>
+        </div>
       </div>
       
       <div className="sidebar-menu">
@@ -56,13 +55,22 @@ const Sidebar = () => {
       </div>
       
       <div className="sidebar-footer">
+        <div className="sidebar-section-label" style={{ padding: '0 1.5rem', fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem', marginTop: '1rem', textTransform: 'uppercase' }}>
+          ADMINISTRATION
+        </div>
         <div className="nav-item">
           <span className="nav-icon"><FiSettings /></span>
           <span className="nav-text">Settings</span>
         </div>
-        <div className="nav-item text-danger-custom" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-          <span className="nav-icon"><FiLogOut /></span>
-          <span className="nav-text">Logout</span>
+        
+        <div className="sidebar-user-profile">
+          <div className="avatar">
+            <img src={`https://ui-avatars.com/api/?name=${user?.name?.replace(' ', '+') || 'John+Doe'}&background=0066ff&color=fff`} alt="User" />
+          </div>
+          <div className="user-info">
+            <span className="user-name">{user?.name || 'John Doe'}</span>
+            <span className="user-role">{user?.role || 'Fleet Manager'}</span>
+          </div>
         </div>
       </div>
     </div>
