@@ -24,10 +24,10 @@ const TopNav = () => {
         
         <div className="user-profile">
           <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${user?.name?.replace(' ', '+') || 'Admin+User'}&background=0066ff&color=fff`} alt="User" />
+            <img src={`https://ui-avatars.com/api/?name=${(user?.fullName || user?.name || 'Admin User').replace(' ', '+')}&background=0066ff&color=fff`} alt="User" />
           </div>
           <div className="user-info">
-            <span className="user-name">{user?.name || 'Admin User'}</span>
+            <span className="user-name">{user?.fullName || user?.name || 'Admin User'}</span>
             <span className="user-role badge-custom badge-primary">{user?.role || 'Fleet Manager'}</span>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiSearch, FiUserPlus, FiStar, FiAlertCircle, FiX, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiUserPlus, FiStar, FiAlertCircle, FiX, FiCheck, FiEdit2 } from 'react-icons/fi';
 import './DriverManagement.css';
 
 const DriverManagement = () => {
@@ -20,6 +20,7 @@ const DriverManagement = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
+    password: '',
     phone: '',
     license_number: '',
     license_category: 'Commercial',
@@ -27,6 +28,16 @@ const DriverManagement = () => {
     joining_date: new Date().toISOString().split('T')[0],
     status: 'Available'
   });
+
+  // Self-profile state (for Driver role)
+  const [myProfile, setMyProfile] = useState(null);
+  const [editProfile, setEditProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ full_name: '', email: '', phone: '', status: '' });
+  const [profileMsg, setProfileMsg] = useState('');
+
+  const isDriver = user?.role === 'Driver';
+  const canModify = user?.role === 'Fleet Manager' || user?.role === 'Safety Officer';
+  const isSafetyOfficer = user?.role === 'Safety Officer';
 
   // Fetch Drivers
   const fetchDrivers = useCallback(async () => {
@@ -38,13 +49,29 @@ const DriverManagement = () => {
       if (statusFilter) params.status = statusFilter;
 
       const response = await API.get('/drivers', { params });
-      setDrivers(response.data.data);
+      const allDrivers = response.data.data;
+
+      if (isDriver) {
+        // Find driver's own profile by matching the logged-in user's email
+        const mine = allDrivers.find(d => d.email === user?.email);
+        setMyProfile(mine || null);
+        if (mine) {
+          setProfileForm({
+            full_name: mine.full_name,
+            email: mine.email,
+            phone: mine.phone || '',
+            status: mine.driver_status
+          });
+        }
+      } else {
+        setDrivers(allDrivers);
+      }
     } catch (err) {
       setError(err.response?.data?.error?.message || 'Failed to load drivers.');
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
+  }, [search, statusFilter, isDriver, user?.email]);
 
   useEffect(() => {
     fetchDrivers();
@@ -58,13 +85,25 @@ const DriverManagement = () => {
     }));
   };
 
+  const handleProfileInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
 
     try {
-      if (!formData.full_name || !formData.email || !formData.license_number || !formData.license_expiry) {
-        setFormError('Required fields: Name, Email, License Number, License Expiry.');
+      if (!formData.full_name || !formData.email || !formData.password || !formData.license_number || !formData.license_expiry) {
+        setFormError('Required fields: Name, Email, Password, License Number, License Expiry.');
+        return;
+      }
+      if (formData.password.length < 6) {
+        setFormError('Password must be at least 6 characters.');
         return;
       }
 
@@ -74,6 +113,7 @@ const DriverManagement = () => {
       setFormData({
         full_name: '',
         email: '',
+        password: '',
         phone: '',
         license_number: '',
         license_category: 'Commercial',
@@ -94,6 +134,36 @@ const DriverManagement = () => {
       fetchDrivers();
     } catch (err) {
       alert(err.response?.data?.error?.message || 'Failed to update driver status.');
+    }
+  };
+
+  const handleSelfProfileUpdate = async (e) => {
+    e.preventDefault();
+    setProfileMsg('');
+    try {
+      await API.put('/drivers/me/update', profileForm);
+      setProfileMsg('Profile updated successfully!');
+      setEditProfile(false);
+      fetchDrivers();
+    } catch (err) {
+      setProfileMsg(err.response?.data?.error?.message || 'Failed to update profile.');
+    }
+  };
+
+  const triggerEditSafetyScore = async (driverId, currentScore) => {
+    const newScoreInput = prompt(`Update Safety Score for Driver ID #${driverId} (0 to 100):`, currentScore);
+    if (newScoreInput === null) return;
+    const score = parseFloat(newScoreInput);
+    if (isNaN(score) || score < 0 || score > 100) {
+      alert('Invalid score. Must be a number between 0 and 100.');
+      return;
+    }
+    
+    try {
+      await API.put(`/drivers/${driverId}`, { safety_score: score });
+      fetchDrivers();
+    } catch (err) {
+      alert(err.response?.data?.error?.message || 'Failed to update safety score.');
     }
   };
 
@@ -131,8 +201,135 @@ const DriverManagement = () => {
     });
   };
 
-  const canModify = user?.role === 'Fleet Manager' || user?.role === 'Safety Officer';
+  // ──────────────────────────────────────────────────────
+  // DRIVER SELF-PROFILE VIEW
+  // ──────────────────────────────────────────────────────
+  if (isDriver) {
+    return (
+      <div className="driver-management">
+        <div className="page-header">
+          <h1 className="page-title">My Profile</h1>
+        </div>
 
+        {error && <div className="text-danger mb-3 p-3 glass-card">{error}</div>}
+
+        {loading ? (
+          <div className="text-center p-4">Loading your profile...</div>
+        ) : !myProfile ? (
+          <div className="text-center p-4 text-muted-custom">Driver profile not found for your account.</div>
+        ) : (
+          <div className="glass-card" style={{ padding: '2rem', maxWidth: '600px' }}>
+            {/* Profile Header */}
+            <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                <img src={`https://ui-avatars.com/api/?name=${myProfile.full_name.replace(' ', '+')}&background=random&size=72`} alt={myProfile.full_name} style={{ width: '100%', height: '100%' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h2 style={{ margin: 0, fontSize: '1.3rem' }}>{myProfile.full_name}</h2>
+                <span className="text-muted-custom" style={{ fontSize: '0.8rem' }}>Driver ID: {myProfile.driver_id} • {myProfile.email}</span>
+                <div style={{ marginTop: '0.3rem' }}>
+                  <span className={`badge-custom badge-${getStatusBadge(myProfile.driver_status)}`}>{myProfile.driver_status}</span>
+                </div>
+              </div>
+              <button 
+                className="btn-secondary-custom" 
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                onClick={() => setEditProfile(!editProfile)}
+              >
+                <FiEdit2 style={{ marginRight: '4px' }} /> {editProfile ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
+
+            {/* Stats Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', marginBottom: '1.2rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Safety Score</span>
+                <span style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', fontSize: '1rem' }}>
+                  <FiStar className="text-warning-custom" style={{ marginRight: '4px' }}/> {parseFloat(myProfile.safety_score).toFixed(1)}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, borderLeft: '1px solid rgba(255,255,255,0.05)', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Total Trips</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{myProfile.total_trips}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>License Category</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{myProfile.license_category || 'N/A'}</span>
+              </div>
+            </div>
+
+            {/* License Compliance */}
+            <div style={{ marginBottom: '1.2rem' }}>
+              {isExpired(myProfile.license_expiry) ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem', background: 'rgba(220,53,69,0.1)', border: '1px solid rgba(220,53,69,0.2)', borderRadius: '6px', fontSize: '0.8rem', color: '#ff6b6b' }}>
+                  <FiAlertCircle /> License Expired ({formatDate(myProfile.license_expiry)})
+                </div>
+              ) : isExpiringSoon(myProfile.license_expiry) ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem', background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.2)', borderRadius: '6px', fontSize: '0.8rem', color: '#f1c40f' }}>
+                  <FiAlertCircle /> License Expiring Soon ({formatDate(myProfile.license_expiry)})
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem', background: 'rgba(40,167,69,0.1)', border: '1px solid rgba(40,167,69,0.2)', borderRadius: '6px', fontSize: '0.8rem', color: '#2ecc71' }}>
+                  <FiCheck /> License Valid (Expires {formatDate(myProfile.license_expiry)})
+                </div>
+              )}
+            </div>
+
+            {/* Feedback Message */}
+            {profileMsg && (
+              <div className={profileMsg.includes('success') ? 'text-success-custom' : 'text-danger'} style={{ marginBottom: '1rem', fontSize: '0.85rem' }}>
+                {profileMsg}
+              </div>
+            )}
+
+            {/* Editable Form (visible only when Edit is toggled) */}
+            {editProfile && (
+              <form onSubmit={handleSelfProfileUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.2rem' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>FULL NAME</label>
+                  <input 
+                    type="text" name="full_name" value={profileForm.full_name}
+                    onChange={handleProfileInputChange} className="auth-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>EMAIL</label>
+                  <input 
+                    type="email" name="email" value={profileForm.email}
+                    onChange={handleProfileInputChange} className="auth-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>PHONE</label>
+                  <input 
+                    type="text" name="phone" value={profileForm.phone}
+                    onChange={handleProfileInputChange} className="auth-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>MY STATUS</label>
+                  <select name="status" value={profileForm.status} onChange={handleProfileInputChange} className="auth-input">
+                    <option value="Available">Available</option>
+                    <option value="Off Duty">Off Duty</option>
+                  </select>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                    You can set yourself to Available or Off Duty only.
+                  </span>
+                </div>
+                <button type="submit" className="btn-primary-custom" style={{ alignSelf: 'flex-start', padding: '0.5rem 1.5rem' }}>
+                  Save Changes
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ──────────────────────────────────────────────────────
+  // MANAGER / SAFETY OFFICER VIEW (Full Driver Management)
+  // ──────────────────────────────────────────────────────
   return (
     <div className="driver-management">
       <div className="page-header">
@@ -199,7 +396,19 @@ const DriverManagement = () => {
                 <div className="driver-stats" style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
                   <div className="stat-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <span className="stat-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Safety Score</span>
-                    <span className="stat-value" style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', fontSize: '0.9rem' }}>
+                    <span 
+                      className="stat-value" 
+                      style={{ 
+                        fontWeight: 'bold', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        fontSize: '0.9rem', 
+                        cursor: isSafetyOfficer ? 'pointer' : 'default',
+                        borderBottom: isSafetyOfficer ? '1px dashed rgba(255,255,255,0.4)' : 'none'
+                      }}
+                      onClick={() => isSafetyOfficer && triggerEditSafetyScore(driver.driver_id, driver.safety_score)}
+                      title={isSafetyOfficer ? "Click to update safety score" : ""}
+                    >
                       <FiStar className="text-warning-custom" style={{ marginRight: '4px' }}/> {parseFloat(driver.safety_score).toFixed(1)}
                     </span>
                   </div>
@@ -285,6 +494,21 @@ const DriverManagement = () => {
                   className="auth-input"
                   placeholder="e.g. johndoe@transitops.com"
                 />
+              </div>
+
+              <div className="form-group mb-3">
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>LOGIN PASSWORD *</label>
+                <input 
+                  type="password" 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleInputChange} 
+                  required 
+                  className="auth-input"
+                  placeholder="Min 6 characters"
+                  minLength={6}
+                />
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>Driver will use this password to login to the system.</span>
               </div>
 
               <div className="form-group mb-3">

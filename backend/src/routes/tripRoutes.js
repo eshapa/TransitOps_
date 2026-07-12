@@ -47,4 +47,5 @@ router.put('/:id/dispatch', authorizeRoles('Fleet Manager', 'Dispatcher', 'Drive
 router.put('/:id/complete', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), validateRequest(tripCompleteSchema), tripController.completeTrip);
 router.put('/:id/cancel', authorizeRoles('Fleet Manager', 'Dispatcher', 'Driver'), validateRequest(tripCancelSchema), tripController.cancelTrip);
 
+
 module.exports = router;

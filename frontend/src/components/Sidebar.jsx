@@ -16,7 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -24,7 +24,10 @@ const Sidebar = () => {
     navigate('/login');
   };
 
-  const navItems = [
+  const isDriver = user?.role === 'Driver';
+
+  // Full navigation for managers / safety officers / analysts
+  const allNavItems = [
     { name: 'Dashboard', path: '/', icon: <FiPieChart /> },
     { name: 'Vehicle Registry', path: '/vehicles', icon: <FiTruck /> },
     { name: 'Driver Management', path: '/drivers', icon: <FiUsers /> },
@@ -34,6 +37,15 @@ const Sidebar = () => {
     { name: 'Fuel & Expenses', path: '/expenses', icon: <FiDollarSign /> },
     { name: 'Reports', path: '/reports', icon: <FiBarChart2 /> },
   ];
+
+  // Drivers only see Dashboard, Trip Management, and their profile
+  const driverNavItems = [
+    { name: 'Dashboard', path: '/', icon: <FiPieChart /> },
+    { name: 'Trip Management', path: '/trips', icon: <FiList /> },
+    { name: 'My Profile', path: '/drivers', icon: <FiUsers /> },
+  ];
+
+  const navItems = isDriver ? driverNavItems : allNavItems;
 
   return (
     <div className="sidebar">
