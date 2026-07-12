@@ -336,6 +336,42 @@ async function seed() {
       console.log('Maintenance logs already exist, skipping seeding.');
     }
 
+    console.log('Seeding default fuel logs & expenses...');
+    const [existingFuel] = await connection.query('SELECT * FROM fuel_logs LIMIT 1');
+    if (existingFuel.length === 0) {
+      const [seededVehicles] = await connection.query('SELECT id, registration_number FROM vehicles');
+      const vehMap = {};
+      seededVehicles.forEach(v => { vehMap[v.registration_number] = v.id; });
+
+      const [seededDrivers] = await connection.query('SELECT id FROM drivers LIMIT 1');
+      const driverId = seededDrivers.length > 0 ? seededDrivers[0].id : 1;
+
+      if (vehMap['GJ01AB4521']) {
+        await connection.query(`
+          INSERT INTO fuel_logs (vehicle_id, driver_id, liters, price_per_liter, total_cost, odometer, fuel_station, filled_date) VALUES
+          (?, ?, 45.00, 1.50, 67.50, 74150.00, 'Shell Warehouse', '2026-07-08')
+        `, [vehMap['GJ01AB4521'], driverId]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Fuel', 67.50, '2026-07-08', 'Fuel Fill-up: 45 liters @ 1.5/L at Shell Warehouse')
+        `, [vehMap['GJ01AB4521']]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Toll', 25.00, '2026-07-08', 'Bridge Toll Fee')
+        `, [vehMap['GJ01AB4521']]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Maintenance', 45.00, '2026-07-05', 'Oil Change & Filter Servicing')
+        `, [vehMap['GJ01AB4521']]);
+      }
+      console.log('Fuel logs & expenses seeded.');
+    } else {
+      console.log('Fuel logs already exist, skipping seeding.');
+    }
+
     console.log('Database schema and seeding completed successfully!');
   } catch (error) {
     console.error('Seeding failed:', error);
