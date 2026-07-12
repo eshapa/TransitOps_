@@ -52,8 +52,8 @@ const DriverManagement = () => {
       const allDrivers = response.data.data;
 
       if (isDriver) {
-        // Find driver's own profile by matching the logged-in user's email
-        const mine = allDrivers.find(d => d.email === user?.email);
+        // Find driver's own profile by matching the logged-in user's ID
+        const mine = allDrivers.find(d => d.user_id === user?.id);
         setMyProfile(mine || null);
         if (mine) {
           setProfileForm({
@@ -345,13 +345,15 @@ const DriverManagement = () => {
 
       <div className="glass-card registry-container" style={{ padding: '1.5rem' }}>
         <div className="registry-toolbar" style={{ border: 'none', padding: '0 0 1.5rem 0' }}>
-          <div className="search-box">
-            <FiSearch className="search-icon" />
+          <div className="search-box" style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+            <FiSearch className="search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
             <input 
               type="text" 
               placeholder="Search drivers by name, email, license..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="auth-input"
+              style={{ paddingLeft: '36px', width: '100%' }}
             />
           </div>
           <div className="filter-box">

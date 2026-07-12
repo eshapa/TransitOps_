@@ -33,6 +33,7 @@ router.use(authMiddleware);
 
 // GET routes (All authenticated users)
 router.get('/fuel', fuelExpenseController.getAllFuelLogs);
+router.get('/fuel/anomalies', fuelExpenseController.getFuelAnomalies);
 router.get('/expenses', fuelExpenseController.getAllExpenses);
 
 // POST routes (Role checks)

@@ -6,6 +6,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { FiTrendingUp, FiMoreVertical } from 'react-icons/fi';
+import LiveMap from '../components/LiveMap';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -358,6 +359,16 @@ const Dashboard = () => {
               )}
             </div>
           </div>
+
+          {/* Live Vehicle Tracking Map */}
+          {filteredTrips.length > 0 && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FiTrendingUp className="text-primary-custom" /> Live Fleet Tracking
+              </h2>
+              <LiveMap trips={filteredTrips} vehicles={filteredVehicles} />
+            </div>
+          )}
         </>
       )}
     </div>
