@@ -266,3 +266,19 @@ ul {
 .row {
   margin-bottom: 1.5rem;
 }
+
+/* Global Select Dropdown & Option Visibility */
+select {
+  background-color: var(--bg-sidebar);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  outline: none;
+}
+
+select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
