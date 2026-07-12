@@ -7,19 +7,19 @@ import './AuthForm.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Dispatcher');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === 'ravenk@transitops.in' && password === 'password') {
-      login({ name: 'Raven K.', email, role });
+    setError('');
+    try {
+      await login(email, password);
       navigate('/');
-    } else {
-      setError('Invalid credentials. Account locked after 5 failed attempts.');
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -53,22 +53,6 @@ const Login = () => {
             required
             className="auth-input"
           />
-        </div>
-
-        <div className="form-group">
-          <label>ROLE (RBAC)</label>
-          <div className="custom-select-wrapper">
-            <select 
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="auth-input custom-select"
-            >
-              <option value="Fleet Manager">Fleet Manager</option>
-              <option value="Dispatcher">Dispatcher</option>
-              <option value="Safety Officer">Safety Officer</option>
-              <option value="Financial Analyst">Financial Analyst</option>
-            </select>
-          </div>
         </div>
 
         <div className="form-row-between">
