@@ -9,8 +9,7 @@ import {
   FiTool, 
   FiDollarSign, 
   FiBarChart2, 
-  FiSettings, 
-  FiLogOut 
+  FiSettings
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
@@ -34,7 +33,7 @@ const Sidebar = () => {
     { name: 'Dispatch Center', path: '/dispatch', icon: <FiMap /> },
     { name: 'Trip Management', path: '/trips', icon: <FiList /> },
     { name: 'Maintenance', path: '/maintenance', icon: <FiTool /> },
-    { name: 'Fuel & Expenses', path: '/expenses', icon: <FiDollarSign /> },
+    { name: 'Fuel & Expenses', path: '/fuel', icon: <FiDollarSign /> },
     { name: 'Reports', path: '/reports', icon: <FiBarChart2 /> },
   ];
 
@@ -50,8 +49,13 @@ const Sidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <div className="logo-icon">T</div>
-        <h2 className="logo-text">TransitOps</h2>
+        <div className="logo-icon-container">
+          <FiTruck className="brand-icon" />
+          <div>
+            <h2 className="logo-text">TransitOps</h2>
+            <span className="logo-subtext">Fleet Management</span>
+          </div>
+        </div>
       </div>
       
       <div className="sidebar-menu">
@@ -68,13 +72,26 @@ const Sidebar = () => {
       </div>
       
       <div className="sidebar-footer">
-        <div className="nav-item">
+        <div className="sidebar-section-label" style={{ padding: '0 1.5rem', fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem', marginTop: '1rem', textTransform: 'uppercase' }}>
+          ADMINISTRATION
+        </div>
+        <div className="nav-item" style={{ cursor: 'pointer' }}>
           <span className="nav-icon"><FiSettings /></span>
           <span className="nav-text">Settings</span>
         </div>
-        <div className="nav-item text-danger-custom" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-          <span className="nav-icon"><FiLogOut /></span>
+        <div className="nav-item" onClick={handleLogout} style={{ cursor: 'pointer', color: 'var(--danger)' }}>
+          <span className="nav-icon">→</span>
           <span className="nav-text">Logout</span>
+        </div>
+        
+        <div className="sidebar-user-profile">
+          <div className="avatar">
+            <img src={`https://ui-avatars.com/api/?name=${(user?.fullName || user?.name || 'User').replace(' ', '+')}&background=0066ff&color=fff`} alt="User" />
+          </div>
+          <div className="user-info">
+            <span className="user-name">{user?.fullName || user?.name || 'User'}</span>
+            <span className="user-role">{user?.role || 'Fleet Manager'}</span>
+          </div>
         </div>
       </div>
     </div>

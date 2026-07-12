@@ -1,8 +1,40 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FiBarChart2, FiDownload, FiTruck, FiActivity, FiDollarSign } from 'react-icons/fi';
 import './TripManagement.css'; // Reuses styles
+=======
+import React from 'react';
+import { FiDownload, FiFileText, FiTrendingUp, FiTrendingDown, FiCheckCircle } from 'react-icons/fi';
+import { BiLeaf } from 'react-icons/bi';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+import './Reports.css';
+
+const revenueData = [
+  { name: 'Jan', revenue: 4000, expenses: 2400 },
+  { name: 'Feb', revenue: 3000, expenses: 1398 },
+  { name: 'Mar', revenue: 2000, expenses: 9800 },
+  { name: 'Apr', revenue: 2780, expenses: 3908 },
+  { name: 'May', revenue: 1890, expenses: 4800 },
+  { name: 'Jun', revenue: 2390, expenses: 3800 },
+  { name: 'Jul', revenue: 3490, expenses: 4300 },
+];
+
+const leaderboard = [
+  { id: 'FLT-9821-X', type: 'Freightliner Cascadia', util: 98, rev: '$12,400', status: 'Optimal', trend: 'up' },
+  { id: 'FLT-7740-Y', type: 'Peterbilt 579', util: 92, rev: '$10,150', status: 'Optimal', trend: 'up' },
+  { id: 'FLT-4412-Z', type: 'Volvo VNL 860', util: 64, rev: '$6,800', status: 'Pending', trend: 'down' },
+];
+>>>>>>> 12846b3 (made maintance page and report)
 
 const Reports = () => {
   const { user } = useAuth();
@@ -91,6 +123,7 @@ const Reports = () => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="reports-analytics" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', overflowY: 'auto' }}>
       <div className="page-header" style={{ marginBottom: 0 }}>
         <h1 className="page-title">Reports & Analytics</h1>
@@ -216,7 +249,198 @@ const Reports = () => {
               </tbody>
             </table>
           )}
+=======
+    <div className="reports-container">
+      <div className="reports-header">
+        <div className="reports-title-col">
+          <h1>Executive Analytics</h1>
+          <p>Performance monitoring for Q3 FY2024 • Updated 4m ago</p>
         </div>
+        <div className="reports-actions">
+          <button className="btn-outline-custom"><FiDownload /> CSV Export</button>
+          <button className="btn-outline-custom"><FiFileText /> PDF Report</button>
+          <button className="btn-outline-custom">Last 30 Days</button>
+        </div>
+      </div>
+
+      <div className="kpi-cards-row">
+        {/* Card 1 */}
+        <div className="kpi-card glass-panel">
+          <div className="kpi-header">
+            <span className="kpi-label">TOTAL FLEET ROI</span>
+            <span className="kpi-trend trend-up"><FiTrendingUp /> 12.4%</span>
+          </div>
+          <h2 className="kpi-value">$2.48M</h2>
+          <div className="kpi-progress-container">
+            <div className="kpi-progress-bg">
+              <div className="kpi-progress-fill" style={{ width: '78%' }}></div>
+            </div>
+            <p className="kpi-desc">78% of target revenue achieved</p>
+          </div>
+>>>>>>> 12846b3 (made maintance page and report)
+        </div>
+
+        {/* Card 2 */}
+        <div className="kpi-card glass-panel">
+          <div className="kpi-header">
+            <span className="kpi-label">FLEET UTILIZATION</span>
+            <span className="kpi-trend trend-up"><FiTrendingUp /> 5.2%</span>
+          </div>
+          <h2 className="kpi-value">94.2%</h2>
+          <div className="kpi-progress-container">
+            <div className="segmented-progress">
+              <div className="segment filled"></div>
+              <div className="segment filled"></div>
+              <div className="segment filled"></div>
+              <div className="segment filled"></div>
+              <div className="segment empty"></div>
+            </div>
+            <p className="kpi-desc">412 active / 445 total units</p>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="kpi-card glass-panel">
+          <div className="kpi-header">
+            <span className="kpi-label">AVG MAINTENANCE COST</span>
+            <span className="kpi-trend trend-down"><FiTrendingDown /> 2.1%</span>
+          </div>
+          <h2 className="kpi-value">$1,142</h2>
+          <div className="kpi-details">
+            <p className="kpi-subval">Efficiency Score: <strong>8.4/10</strong></p>
+            <p className="kpi-desc">Per vehicle per month</p>
+          </div>
+        </div>
+
+        {/* Card 4 */}
+        <div className="kpi-card glass-panel">
+          <div className="kpi-header">
+            <span className="kpi-label">TOTAL CARBON OFFSET</span>
+            <BiLeaf className="icon-green" />
+          </div>
+          <h2 className="kpi-value">14.2t</h2>
+          <div className="kpi-details">
+            <p className="kpi-subval text-green"><FiCheckCircle /> Tier 1 Compliance</p>
+            <p className="kpi-desc">Emission savings vs 2023</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="charts-row">
+        <div className="chart-main glass-panel">
+          <div className="chart-header">
+            <div>
+              <h3>Revenue vs Expenses</h3>
+              <p>Comparative operating margin overview</p>
+            </div>
+            <div className="chart-legend">
+              <span className="legend-item"><span className="legend-dot color-revenue"></span> Revenue</span>
+              <span className="legend-item"><span className="legend-dot color-expenses"></span> Expenses</span>
+            </div>
+          </div>
+          <div className="chart-area" style={{ height: '300px' }}>
+             <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a5b4fc" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#a5b4fc" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#a0aabf'}} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#15181e', border: '1px solid rgba(255,255,255,0.1)' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#a5b4fc" fillOpacity={1} fill="url(#colorRev)" />
+                <Area type="monotone" dataKey="expenses" stroke="#34d399" fillOpacity={1} fill="url(#colorExp)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="chart-side glass-panel">
+          <div className="chart-header">
+            <div>
+              <h3>Operational Health</h3>
+              <p>Real-time risk distribution</p>
+            </div>
+          </div>
+          <div className="radar-placeholder">
+            <div className="radar-bg">
+              <div className="radar-circle circle-1"></div>
+              <div className="radar-circle circle-2"></div>
+              <div className="radar-circle circle-3"></div>
+              
+              <div className="radar-point point-1"></div>
+              <div className="radar-point point-2"></div>
+              <div className="radar-point point-3"></div>
+            </div>
+          </div>
+          <div className="radar-footer">
+            <div className="status-box">
+              <span className="status-label">Maintenance</span>
+              <span className="status-val text-green">Optimal</span>
+            </div>
+            <div className="status-box">
+              <span className="status-label">Staffing</span>
+              <span className="status-val text-red">Critical</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="leaderboard-section glass-panel">
+        <div className="leaderboard-header">
+          <h3>Asset Performance Leaderboard</h3>
+          <a href="#" className="link-action">View All Assets</a>
+        </div>
+        
+        <table className="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Vehicle ID</th>
+              <th>Type</th>
+              <th>Utilization</th>
+              <th>Revenue Gen.</th>
+              <th>Maintenance Status</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((item, idx) => (
+              <tr key={idx}>
+                <td className="font-mono text-muted">{item.id}</td>
+                <td>{item.type}</td>
+                <td>
+                  <div className="util-cell">
+                    <strong>{item.util}%</strong>
+                    <div className="util-bar-bg">
+                      <div className="util-bar-fill bg-green" style={{ width: `${item.util}%` }}></div>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>{item.rev}</strong></td>
+                <td>
+                  <div className="status-indicator-cell">
+                    <span className={`dot-${item.status === 'Optimal' ? 'green' : 'red'}`}></span>
+                    {item.status}
+                  </div>
+                </td>
+                <td>
+                  {item.trend === 'up' 
+                    ? <FiTrendingUp className="text-green" /> 
+                    : <FiTrendingDown className="text-red" />
+                  }
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

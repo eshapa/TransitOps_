@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -302,8 +303,196 @@ const Maintenance = () => {
               <button type="submit" className="btn-primary-custom" style={{ flex: 1 }}>Schedule Order</button>
             </div>
           </form>
+=======
+import React from 'react';
+import { FiMoreHorizontal, FiPlus, FiFilter, FiList, FiDownload, FiCheckCircle } from 'react-icons/fi';
+import './Maintenance.css';
+
+const Maintenance = () => {
+  return (
+    <div className="maintenance-container">
+      <div className="maintenance-header">
+        <div className="maintenance-title">
+          <h1>Maintenance Board</h1>
+          <div className="maintenance-meta">
+            <span>🔄 Last updated: 2 mins ago</span>
+            <span>🔧 24 active jobs</span>
+          </div>
+        </div>
+        
+        <div className="maintenance-actions">
+          <div className="avatar-stack">
+            <img src="https://ui-avatars.com/api/?name=David+Miller&background=random" alt="Tech" />
+            <img src="https://ui-avatars.com/api/?name=Sarah+Jenkins&background=random" alt="Tech" />
+            <img src="https://ui-avatars.com/api/?name=Robert+Fox&background=random" alt="Tech" />
+            <div className="avatar-more">+5</div>
+          </div>
+          <button className="btn-outline"><FiFilter /> Filter</button>
+          <button className="btn-outline"><FiList /> Priority</button>
         </div>
       </div>
+
+      <div className="kanban-board">
+        {/* Scheduled Column */}
+        <div className="kanban-column">
+          <div className="column-header">
+            <h3>Scheduled <span className="col-count">8</span></h3>
+            <FiPlus className="col-add-icon" />
+          </div>
+          
+          <div className="kanban-cards">
+            <div className="task-card">
+              <div className="card-header">
+                <span className="badge badge-routine">ROUTINE CHECK</span>
+                <FiMoreHorizontal className="more-icon" />
+              </div>
+              <h4>Freightliner Cascadia #8842</h4>
+              <p className="task-desc">50k Mile Engine Lubrication Service</p>
+              
+              <div className="task-details">
+                <div className="detail-row">
+                  <span className="detail-label">👤 Assignee:</span>
+                  <span className="detail-val">David Miller</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">📅 Due Date:</span>
+                  <span className="detail-val">Oct 24, 2023</span>
+                </div>
+                <div className="detail-row mt-2">
+                  <span className="detail-label">Est. Cost:</span>
+                  <span className="detail-val text-success font-semibold">$1,240.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="task-card">
+              <div className="card-header">
+                <span className="badge badge-urgent">URGENT WARNING</span>
+                <FiMoreHorizontal className="more-icon" />
+              </div>
+              <h4>Kenworth T680 #2210</h4>
+              <p className="task-desc">Brake Pad Sensor Alert - Front Axle</p>
+              
+              <div className="task-details">
+                <div className="detail-row">
+                  <span className="detail-label">👤 Assignee:</span>
+                  <span className="detail-val">Sarah Jenkins</span>
+                </div>
+                <div className="detail-row mt-2">
+                  <span className="detail-label">! Priority:</span>
+                  <span className="detail-val text-danger font-semibold">High</span>
+                </div>
+              </div>
+            </div>
+            
+            <button className="btn-add-task">+ Add New Task</button>
+          </div>
+        </div>
+
+        {/* In Progress Column */}
+        <div className="kanban-column">
+          <div className="column-header">
+            <h3>In Progress <span className="col-count active">4</span></h3>
+          </div>
+          
+          <div className="kanban-cards">
+            <div className="task-card card-active">
+              <div className="card-header">
+                <span className="badge badge-processing"><span className="dot-green"></span> PROCESSING</span>
+                <FiMoreHorizontal className="more-icon" />
+              </div>
+              <h4>Peterbilt 579 #5521</h4>
+              <p className="task-desc">Transmission Overhaul & Fluid Flush</p>
+              
+              <div className="task-progress-section">
+                <div className="progress-labels">
+                  <span>Progress</span>
+                  <span>65%</span>
+                </div>
+                <div className="progress-bar-bg">
+                  <div className="progress-bar-fill bg-green" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+              
+              <div className="task-details">
+                <div className="detail-row">
+                  <span className="detail-label">🛠️ Tech:</span>
+                  <div className="tech-user">
+                    <img src="https://ui-avatars.com/api/?name=Robert+Fox&background=random" alt="Tech" />
+                    <span>Robert Fox</span>
+                  </div>
+                </div>
+                <div className="detail-row mt-2">
+                  <span className="detail-label">Current Accrual:</span>
+                  <span className="detail-val font-mono">$4,850.22</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="task-card card-active card-warning-border">
+              <div className="card-header">
+                <span className="badge badge-processing"><span className="dot-green"></span> AWAITING PARTS</span>
+                <FiMoreHorizontal className="more-icon" />
+              </div>
+              <h4>Volvo VNL #9001</h4>
+              <p className="task-desc">HVAC System Replacement</p>
+              
+              <div className="backorder-alert">
+                📦 Blower motor backordered (ETA 10/26)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Completed Column */}
+        <div className="kanban-column">
+          <div className="column-header">
+            <h3>Completed <span className="col-count">12</span></h3>
+            <span className="clear-all">Clear All</span>
+          </div>
+          
+          <div className="kanban-cards">
+            <div className="task-card card-completed">
+              <div className="card-header">
+                <span className="badge badge-finalized">FINALIZED</span>
+                <FiCheckCircle className="text-success" />
+              </div>
+              <h4>Mack Anthem #1143</h4>
+              <p className="task-desc">Tire Rotation and Alignment</p>
+              
+              <div className="task-details">
+                <div className="detail-row">
+                  <span className="detail-label">Duration:</span>
+                  <span className="detail-val">4h 15m</span>
+                </div>
+                <div className="detail-row mt-2">
+                  <span className="detail-label">Total Cost:</span>
+                  <span className="detail-val font-semibold">$412.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="task-card card-completed">
+              <div className="card-header">
+                <span className="badge badge-finalized">FINALIZED</span>
+                <FiCheckCircle className="text-success" />
+              </div>
+              <h4>International LT #7762</h4>
+              <p className="task-desc">Oil & Filter Change</p>
+              
+              <div className="card-actions">
+                <button className="btn-view-report">View Report</button>
+                <button className="btn-download-icon"><FiDownload /></button>
+              </div>
+            </div>
+          </div>
+>>>>>>> 12846b3 (made maintance page and report)
+        </div>
+      </div>
+      
+      <button className="fab-add">
+        <FiPlus />
+      </button>
     </div>
   );
 };

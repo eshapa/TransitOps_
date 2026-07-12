@@ -273,8 +273,7 @@ const TripManagement = () => {
                 })}
               </tbody>
             </table>
-          )}
-        </div>
+          )}>
       </div>
 
       {/* Add Trip Drawer */}
