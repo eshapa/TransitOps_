@@ -44,7 +44,7 @@ const registerSchema = Joi.object({
     'string.min': 'Password must be at least 6 characters.',
     'any.required': 'Password is required.'
   }),
-  role: Joi.string().valid('Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst', 'Driver').required().messages({
+  roleName: Joi.string().valid('Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst', 'Driver').required().messages({
     'any.only': 'Invalid role selection.',
     'any.required': 'Role is required.'
   })
@@ -53,7 +53,7 @@ const registerSchema = Joi.object({
 // Apply rate limiter and validation to the login route
 router.post('/login', loginLimiter, validateRequest(loginSchema), authController.login);
 
-// Place registration route map
+// Mount register route
 router.post('/register', validateRequest(registerSchema), authController.register);
 
 module.exports = router;

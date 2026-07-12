@@ -146,12 +146,15 @@ const Maintenance = () => {
               </div>
               
               <div className="kanban-cards" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, overflowY: 'auto' }}>
-                {stage.tasks.map(task => (
-                  <div className="kanban-card glass-card" key={task.id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                    <div className="card-top" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      <span className="task-id">Order ID: #{task.id}</span>
-                      <span>Veh ID: {task.vehicle_id}</span>
-                    </div>
+                {stage.tasks.map(task => {
+                  const vehObj = vehicles.find(v => v.id === task.vehicle_id);
+                  const vehDisplay = vehObj ? `${vehObj.vehicle_name} (${vehObj.registration_number})` : `Vehicle #${task.vehicle_id}`;
+                  return (
+                    <div className="kanban-card glass-card" key={task.id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      <div className="card-top" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <span className="task-id">Order ID: #{task.id}</span>
+                        <span>{vehDisplay}</span>
+                      </div>
                     <h4 className="task-vehicle" style={{ fontSize: '0.9rem', margin: 0, color: 'var(--primary-accent)' }}>
                       {task.maintenance_type || 'General Service'}
                     </h4>
@@ -182,7 +185,8 @@ const Maintenance = () => {
                       </button>
                     )}
                   </div>
-                ))}
+                );
+              })}
               </div>
             </div>
           ))}

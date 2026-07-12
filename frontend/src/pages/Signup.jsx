@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import './AuthForm.css';
 
@@ -10,19 +9,16 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('Dispatcher');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signup } = useAuth();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       await signup(fullName, email, password, role);
-      // Registration complete, navigate to login
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,6 +42,7 @@ const Signup = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
+            autoComplete="name"
             className="auth-input"
             disabled={loading}
           />
@@ -59,13 +56,13 @@ const Signup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className="auth-input"
             disabled={loading}
           />
         </div>
 
         <div className="form-group">
-          <label>PASSWORD</label>
           <div className="password-input-wrapper">
             <input 
               type={showPassword ? "text" : "password"} 
@@ -73,6 +70,7 @@ const Signup = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="new-password"
               className="auth-input"
               disabled={loading}
             />

@@ -73,48 +73,57 @@ async function login(req, res, next) {
 }
 
 async function register(req, res, next) {
-  const { fullName, email, password, role } = req.body;
+  const { fullName, email, password, roleName } = req.body;
 
   try {
-    // 1. Check if user already exists
+    // Map role names if they differ
+    let targetRole = roleName || 'Driver';
+    if (targetRole === 'Dispatcher') {
+      targetRole = 'Driver';
+    }
+
+    // Check if user already exists
     const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(400).json({
         success: false,
-        error: { message: 'Email is already registered.' }
+        error: { message: 'User with this email already exists.' }
       });
     }
 
-    // 2. Fetch role_id
-    const [roles] = await pool.execute('SELECT id FROM roles WHERE name = ?', [role]);
+    // Fetch role_id
+    const [roles] = await pool.execute('SELECT id, name FROM roles WHERE name = ?', [targetRole]);
     if (roles.length === 0) {
       return res.status(400).json({
         success: false,
-        error: { message: 'Invalid role selected.' }
+        error: { message: `Role '${targetRole}' is invalid.` }
       });
     }
     const roleId = roles[0].id;
+    const resolvedRoleName = roles[0].name;
 
-    // 3. Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. If role is Driver, insert both user & driver inside database transaction
-    if (role === 'Driver') {
+    let newUserId;
+
+    // If role is Driver, insert both user & driver inside database transaction
+    if (resolvedRoleName === 'Driver') {
       const connection = await pool.getConnection();
       try {
         await connection.beginTransaction();
 
         const [userResult] = await connection.execute(
           'INSERT INTO users (role_id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)',
-          [roleId, fullName, email, passwordHash, 'Active']
+          [roleId, fullName, email, hashedPassword, 'Active']
         );
-        const userId = userResult.insertId;
+        newUserId = userResult.insertId;
 
         // Generate a random license number for self-registration: "REG-xxxxxxx"
         const licenseNumber = `REG-${Math.floor(1000000 + Math.random() * 9000000)}`;
         await connection.execute(
           'INSERT INTO drivers (user_id, license_number, license_category, license_expiry, joining_date, status) VALUES (?, ?, ?, ?, ?, ?)',
-          [userId, licenseNumber, 'Commercial', '2030-12-31', new Date().toISOString().split('T')[0], 'Available']
+          [newUserId, licenseNumber, 'Commercial', '2030-12-31', new Date().toISOString().split('T')[0], 'Available']
         );
 
         await connection.commit();
@@ -126,16 +135,36 @@ async function register(req, res, next) {
       }
     } else {
       // Create user only
-      await pool.execute(
+      const [result] = await pool.execute(
         'INSERT INTO users (role_id, full_name, email, password_hash, status) VALUES (?, ?, ?, ?, ?)',
-        [roleId, fullName, email, passwordHash, 'Active']
+        [roleId, fullName, email, hashedPassword, 'Active']
       );
+      newUserId = result.insertId;
     }
+
+    // Generate JWT
+    const token = jwt.sign(
+      {
+        id: newUserId,
+        email: email,
+        roleName: resolvedRoleName
+      },
+      process.env.JWT_SECRET || 'transitops_super_secret_jwt_key_2026',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
+    );
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful'
+      message: 'Registration successful',
+      token,
+      user: {
+        id: newUserId,
+        fullName,
+        email,
+        role: resolvedRoleName
+      }
     });
+
   } catch (error) {
     next(error);
   }

@@ -202,16 +202,20 @@ const FuelExpenses = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {fuelLogs.map(fl => (
-                    <tr key={fl.id}>
-                      <td>{fl.vehicle_id}</td>
-                      <td>{new Date(fl.filled_date).toLocaleDateString()}</td>
-                      <td>{fl.liters} L</td>
-                      <td>${fl.price_per_liter}</td>
-                      <td className="text-primary-custom font-weight-bold">${parseFloat(fl.total_cost).toFixed(2)}</td>
-                      <td>{fl.fuel_station || 'N/A'}</td>
-                    </tr>
-                  ))}
+                  {fuelLogs.map(fl => {
+                    const vehObj = vehicles.find(v => v.id === fl.vehicle_id);
+                    const vehReg = vehObj ? vehObj.registration_number : `Veh #${fl.vehicle_id}`;
+                    return (
+                      <tr key={fl.id}>
+                        <td>{vehReg}</td>
+                        <td>{new Date(fl.filled_date).toLocaleDateString()}</td>
+                        <td>{fl.liters} L</td>
+                        <td>${fl.price_per_liter}</td>
+                        <td className="text-primary-custom font-weight-bold">${parseFloat(fl.total_cost).toFixed(2)}</td>
+                        <td>{fl.fuel_station || 'N/A'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -238,15 +242,20 @@ const FuelExpenses = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {expenses.map(exp => (
-                    <tr key={exp.id}>
-                      <td>{exp.vehicle_id ? `Veh: ${exp.vehicle_id}` : exp.trip_id ? `Trip: ${exp.trip_id}` : 'General'}</td>
-                      <td>{new Date(exp.expense_date).toLocaleDateString()}</td>
-                      <td>{exp.expense_type}</td>
-                      <td className="text-primary-custom font-weight-bold">${parseFloat(exp.amount).toFixed(2)}</td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{exp.description || 'N/A'}</td>
-                    </tr>
-                  ))}
+                  {expenses.map(exp => {
+                    const vehObj = vehicles.find(v => v.id === exp.vehicle_id);
+                    const vehReg = vehObj ? vehObj.registration_number : '';
+                    const displaySource = vehReg ? `Veh: ${vehReg}` : exp.trip_id ? `Trip: ${exp.trip_id}` : 'General';
+                    return (
+                      <tr key={exp.id}>
+                        <td>{displaySource}</td>
+                        <td>{new Date(exp.expense_date).toLocaleDateString()}</td>
+                        <td>{exp.expense_type}</td>
+                        <td className="text-primary-custom font-weight-bold">${parseFloat(exp.amount).toFixed(2)}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{exp.description || 'N/A'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

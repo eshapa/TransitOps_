@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiSearch, FiPlus, FiMoreHorizontal, FiX } from 'react-icons/fi';
+import { FiX, FiPlus } from 'react-icons/fi';
 import './VehicleRegistry.css';
 
 const VehicleRegistry = () => {
@@ -11,7 +11,7 @@ const VehicleRegistry = () => {
   const [error, setError] = useState('');
   
   // Search & Filter State
-  const [search, setSearch] = useState('');
+  const [searchReg, setSearchReg] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
@@ -41,7 +41,7 @@ const VehicleRegistry = () => {
     setError('');
     try {
       const params = {};
-      if (search) params.search = search;
+      if (searchReg) params.search = searchReg;
       if (statusFilter) params.status = statusFilter;
       if (typeFilter) params.type = typeFilter;
 
@@ -52,7 +52,7 @@ const VehicleRegistry = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter, typeFilter]);
+  }, [searchReg, statusFilter, typeFilter]);
 
   useEffect(() => {
     fetchVehicles();
@@ -71,7 +71,6 @@ const VehicleRegistry = () => {
     setFormError('');
 
     try {
-      // Validate inputs loosely on frontend
       if (!formData.registration_number || !formData.maximum_load_capacity) {
         setFormError('Registration number and load capacity are required.');
         return;
@@ -110,14 +109,25 @@ const VehicleRegistry = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusClass = (status) => {
     switch(status) {
-      case 'On Trip': return 'warning';
-      case 'Available': return 'success';
-      case 'In Shop': return 'danger';
-      case 'Retired': return 'danger';
-      default: return 'primary';
+      case 'Available': return 'available';
+      case 'On Trip': return 'on-trip';
+      case 'In Shop': return 'in-shop';
+      case 'Retired': return 'retired';
+      default: return 'available';
     }
+  };
+
+  // Helper to format capacity e.g. 500 kg or 5 Ton
+  const formatCapacity = (cap) => {
+    const num = parseFloat(cap);
+    if (isNaN(num)) return cap;
+    if (num >= 1000) {
+      const tons = num / 1000;
+      return `${Number(tons.toFixed(1))} Ton`;
+    }
+    return `${Math.round(num)} kg`;
   };
 
   const isFleetManager = user?.role === 'Fleet Manager';
@@ -126,57 +136,55 @@ const VehicleRegistry = () => {
     <div className="vehicle-registry">
       <div className="page-header">
         <h1 className="page-title">Vehicle Registry</h1>
-        <div className="header-actions">
+      </div>
+
+      <div className="glass-card registry-container">
+        {/* Registry Toolbar with custom styled selects and Add Vehicle on right */}
+        <div className="registry-toolbar">
+          <div className="filters-group">
+            <select 
+              value={typeFilter} 
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Type: All</option>
+              <option value="Van">Type: Van</option>
+              <option value="Truck">Type: Truck</option>
+              <option value="Mini">Type: Mini</option>
+              <option value="Trailer">Type: Trailer</option>
+            </select>
+
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Status: All</option>
+              <option value="Available">Status: Available</option>
+              <option value="On Trip">Status: On Trip</option>
+              <option value="In Shop">Status: In Shop</option>
+              <option value="Retired">Status: Retired</option>
+            </select>
+
+            <input 
+              type="text" 
+              placeholder="Search reg. no..." 
+              value={searchReg}
+              onChange={(e) => setSearchReg(e.target.value)}
+              className="search-reg-input"
+            />
+          </div>
+
           {isFleetManager && (
-            <button className="btn-primary-custom" onClick={() => setIsAddDrawerOpen(true)}>
+            <button className="btn-add-vehicle" onClick={() => setIsAddDrawerOpen(true)}>
               <FiPlus /> Add Vehicle
             </button>
           )}
         </div>
-      </div>
-
-      <div className="glass-card registry-container">
-        <div className="registry-toolbar">
-          <div className="search-box">
-            <FiSearch className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search by name, model, plate..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="filter-box" style={{ display: 'flex', gap: '1rem' }}>
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="auth-input"
-              style={{ width: '150px', padding: '0.4rem' }}
-            >
-              <option value="">All Statuses</option>
-              <option value="Available">Available</option>
-              <option value="On Trip">On Trip</option>
-              <option value="In Shop">In Shop</option>
-              <option value="Retired">Retired</option>
-            </select>
-            <select 
-              value={typeFilter} 
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="auth-input"
-              style={{ width: '150px', padding: '0.4rem' }}
-            >
-              <option value="">All Types</option>
-              <option value="Van">Van</option>
-              <option value="Truck">Truck</option>
-              <option value="Mini">Mini</option>
-              <option value="Trailer">Trailer</option>
-            </select>
-          </div>
-        </div>
 
         {error && <div className="p-3 text-danger">{error}</div>}
 
-        <div className="table-responsive" style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="table-responsive">
           {loading ? (
             <div className="p-4 text-center">Loading vehicles...</div>
           ) : vehicles.length === 0 ? (
@@ -185,36 +193,39 @@ const VehicleRegistry = () => {
             <table className="table-custom">
               <thead>
                 <tr>
-                  <th>Plate / Reg No</th>
-                  <th>Make & Model</th>
+                  <th>Reg. No. (Unique)</th>
+                  <th>Name/Model</th>
                   <th>Type</th>
                   <th>Capacity</th>
                   <th>Odometer</th>
+                  <th>Acq. Cost</th>
                   <th>Status</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {vehicles.map(v => (
                   <tr key={v.id} onClick={() => setSelectedVehicle(v)} className="clickable-row">
                     <td className="text-primary-custom font-weight-bold">{v.registration_number}</td>
-                    <td>{v.manufacturer || ''} {v.vehicle_name || ''} {v.vehicle_model || ''}</td>
+                    <td>{v.vehicle_name || ''}</td>
                     <td>{v.vehicle_type}</td>
-                    <td>{v.maximum_load_capacity} kg</td>
-                    <td>{parseFloat(v.current_odometer).toLocaleString()} km</td>
+                    <td>{formatCapacity(v.maximum_load_capacity)}</td>
+                    <td>{Math.round(parseFloat(v.current_odometer)).toLocaleString('en-US')}</td>
+                    <td>{v.acquisition_cost ? Math.round(parseFloat(v.acquisition_cost)).toLocaleString('en-IN') : 'N/A'}</td>
                     <td>
-                      <span className={`badge-custom badge-${getStatusColor(v.status)}`}>
+                      <span className={`status-pill ${getStatusClass(v.status)}`}>
                         {v.status}
                       </span>
-                    </td>
-                    <td>
-                      <button className="icon-btn" onClick={(e) => { e.stopPropagation(); }}><FiMoreHorizontal /></button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Orange Rule Text Notice below Table */}
+        <div className="rule-notice-text">
+          Rule: Registration No. must be unique · Retired/In Shop vehicles are hidden from Trip Dispatcher
         </div>
       </div>
 
@@ -229,11 +240,6 @@ const VehicleRegistry = () => {
               </div>
               <div className="drawer-content">
                 <div className="drawer-section">
-                  <div className="drawer-image-placeholder">
-                    <span>{selectedVehicle.vehicle_model || 'Vehicle Model'}</span>
-                  </div>
-                </div>
-                <div className="drawer-section">
                   <h3>Overview</h3>
                   <div className="detail-grid">
                     <div className="detail-item">
@@ -242,10 +248,12 @@ const VehicleRegistry = () => {
                     </div>
                     <div className="detail-item">
                       <label>Status</label>
-                      <span className={`badge-custom badge-${getStatusColor(selectedVehicle.status)}`}>{selectedVehicle.status}</span>
+                      <span className={`status-pill ${getStatusClass(selectedVehicle.status)}`} style={{ display: 'block', width: '100px' }}>
+                        {selectedVehicle.status}
+                      </span>
                     </div>
                     <div className="detail-item">
-                      <label>License Plate</label>
+                      <label>Registration Number</label>
                       <span>{selectedVehicle.registration_number}</span>
                     </div>
                     <div className="detail-item">
@@ -254,15 +262,15 @@ const VehicleRegistry = () => {
                     </div>
                     <div className="detail-item">
                       <label>Load Capacity</label>
-                      <span>{selectedVehicle.maximum_load_capacity} kg</span>
+                      <span>{formatCapacity(selectedVehicle.maximum_load_capacity)}</span>
                     </div>
                     <div className="detail-item">
                       <label>Odometer</label>
-                      <span>{parseFloat(selectedVehicle.current_odometer).toLocaleString()} km</span>
+                      <span>{Math.round(parseFloat(selectedVehicle.current_odometer)).toLocaleString('en-US')} km</span>
                     </div>
                     <div className="detail-item">
                       <label>Acquisition Cost</label>
-                      <span>{selectedVehicle.acquisition_cost ? `$${parseFloat(selectedVehicle.acquisition_cost).toLocaleString()}` : 'N/A'}</span>
+                      <span>{selectedVehicle.acquisition_cost ? `$${Math.round(parseFloat(selectedVehicle.acquisition_cost)).toLocaleString('en-IN')}` : 'N/A'}</span>
                     </div>
                     <div className="detail-item">
                       <label>Fuel Type</label>
@@ -291,7 +299,7 @@ const VehicleRegistry = () => {
               {formError && <div className="text-danger mb-3">{formError}</div>}
               
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>REGISTRATION NUMBER (PLATE) *</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>REGISTRATION NUMBER (PLATE) *</label>
                 <input 
                   type="text" 
                   name="registration_number" 
@@ -304,7 +312,7 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>VEHICLE NAME / MAKE *</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>VEHICLE NAME / MAKE *</label>
                 <input 
                   type="text" 
                   name="vehicle_name" 
@@ -312,12 +320,12 @@ const VehicleRegistry = () => {
                   onChange={handleInputChange} 
                   required
                   className="auth-input"
-                  placeholder="e.g. Transit Van"
+                  placeholder="e.g. VAN-05"
                 />
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>MODEL</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>MODEL</label>
                 <input 
                   type="text" 
                   name="vehicle_model" 
@@ -329,7 +337,7 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>MANUFACTURER</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>MANUFACTURER</label>
                 <input 
                   type="text" 
                   name="manufacturer" 
@@ -341,7 +349,7 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>TYPE</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>TYPE</label>
                 <select name="vehicle_type" value={formData.vehicle_type} onChange={handleInputChange} className="auth-input">
                   <option value="Van">Van</option>
                   <option value="Truck">Truck</option>
@@ -351,7 +359,7 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>MAX LOAD CAPACITY (KG) *</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>MAX LOAD CAPACITY (KG) *</label>
                 <input 
                   type="number" 
                   name="maximum_load_capacity" 
@@ -359,12 +367,12 @@ const VehicleRegistry = () => {
                   onChange={handleInputChange} 
                   required
                   className="auth-input"
-                  placeholder="e.g. 1500"
+                  placeholder="e.g. 500"
                 />
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>FUEL TYPE</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>FUEL TYPE</label>
                 <select name="fuel_type" value={formData.fuel_type} onChange={handleInputChange} className="auth-input">
                   <option value="Petrol">Petrol</option>
                   <option value="Diesel">Diesel</option>
@@ -374,7 +382,7 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>CURRENT ODOMETER (KM)</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>CURRENT ODOMETER (KM)</label>
                 <input 
                   type="number" 
                   name="current_odometer" 
@@ -385,19 +393,19 @@ const VehicleRegistry = () => {
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ACQUISITION COST ($)</label>
+                <label style={{ fontSize: '0.8rem', color: '#a0aec0' }}>ACQUISITION COST ($)</label>
                 <input 
                   type="number" 
                   name="acquisition_cost" 
                   value={formData.acquisition_cost} 
                   onChange={handleInputChange}
                   className="auth-input"
-                  placeholder="e.g. 45000"
+                  placeholder="e.g. 620000"
                 />
               </div>
             </div>
             
-            <div className="drawer-footer" style={{ padding: '1rem', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '1rem' }}>
+            <div className="drawer-footer" style={{ padding: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', gap: '1rem' }}>
               <button type="button" className="btn-secondary-custom" onClick={() => setIsAddDrawerOpen(false)} style={{ flex: 1 }}>Cancel</button>
               <button type="submit" className="btn-primary-custom" style={{ flex: 1 }}>Register Vehicle</button>
             </div>

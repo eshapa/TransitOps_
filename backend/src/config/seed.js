@@ -291,6 +291,89 @@ async function seed() {
       console.log('Users already exist, skipping seeding.');
     }
 
+    console.log('Seeding default vehicles...');
+    const [existingVehicles] = await connection.query('SELECT * FROM vehicles LIMIT 1');
+    if (existingVehicles.length === 0) {
+      await connection.query(`
+        INSERT INTO vehicles (registration_number, vehicle_name, vehicle_model, vehicle_type, maximum_load_capacity, current_odometer, acquisition_cost, status) VALUES
+        ('GJ01AB4521', 'VAN-05', 'VAN-05', 'Van', 500.00, 74000.00, 620000.00, 'Available'),
+        ('GJ01AB9981', 'TRUCK-11', 'TRUCK-11', 'Truck', 5000.00, 182000.00, 2450000.00, 'On Trip'),
+        ('GJ01AB1120', 'MINI-03', 'MINI-03', 'Mini', 1000.00, 66000.00, 410000.00, 'In Shop'),
+        ('GJ01AB0008', 'VAN-09', 'VAN-09', 'Van', 750.00, 241900.00, 590000.00, 'Retired')
+      `);
+      console.log('Vehicles seeded.');
+    } else {
+      console.log('Vehicles already exist, skipping vehicle seeding.');
+    }
+
+    console.log('Seeding default maintenance logs...');
+    const [existingLogs] = await connection.query('SELECT * FROM maintenance LIMIT 1');
+    if (existingLogs.length === 0) {
+      const [seededVehicles] = await connection.query('SELECT id, registration_number FROM vehicles');
+      const vehMap = {};
+      seededVehicles.forEach(v => { vehMap[v.registration_number] = v.id; });
+
+      if (vehMap['GJ01AB1120']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, cost, start_date, status) VALUES
+          (?, 'Engine Diagnostic', 'Check engine warning light and scan codes', 'Speedy Repairs', 180.00, '2026-07-10', 'In Progress')
+        `, [vehMap['GJ01AB1120']]);
+      }
+
+      if (vehMap['GJ01AB4521']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, cost, start_date, completion_date, status) VALUES
+          (?, 'Oil Change', 'Regular engine oil and filter change', 'Quick Lube', 45.00, '2026-07-05', '2026-07-05', 'Completed')
+        `, [vehMap['GJ01AB4521']]);
+      }
+
+      if (vehMap['GJ01AB0008']) {
+        await connection.query(`
+          INSERT INTO maintenance (vehicle_id, maintenance_type, description, vendor, start_date, status) VALUES
+          (?, 'Brake Inspection', 'Annual brake pad wear check', 'Brake Masters', '2026-07-15', 'Scheduled')
+        `, [vehMap['GJ01AB0008']]);
+      }
+      console.log('Maintenance logs seeded.');
+    } else {
+      console.log('Maintenance logs already exist, skipping seeding.');
+    }
+
+    console.log('Seeding default fuel logs & expenses...');
+    const [existingFuel] = await connection.query('SELECT * FROM fuel_logs LIMIT 1');
+    if (existingFuel.length === 0) {
+      const [seededVehicles] = await connection.query('SELECT id, registration_number FROM vehicles');
+      const vehMap = {};
+      seededVehicles.forEach(v => { vehMap[v.registration_number] = v.id; });
+
+      const [seededDrivers] = await connection.query('SELECT id FROM drivers LIMIT 1');
+      const driverId = seededDrivers.length > 0 ? seededDrivers[0].id : 1;
+
+      if (vehMap['GJ01AB4521']) {
+        await connection.query(`
+          INSERT INTO fuel_logs (vehicle_id, driver_id, liters, price_per_liter, total_cost, odometer, fuel_station, filled_date) VALUES
+          (?, ?, 45.00, 1.50, 67.50, 74150.00, 'Shell Warehouse', '2026-07-08')
+        `, [vehMap['GJ01AB4521'], driverId]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Fuel', 67.50, '2026-07-08', 'Fuel Fill-up: 45 liters @ 1.5/L at Shell Warehouse')
+        `, [vehMap['GJ01AB4521']]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Toll', 25.00, '2026-07-08', 'Bridge Toll Fee')
+        `, [vehMap['GJ01AB4521']]);
+
+        await connection.query(`
+          INSERT INTO expenses (vehicle_id, expense_type, amount, expense_date, description) VALUES
+          (?, 'Maintenance', 45.00, '2026-07-05', 'Oil Change & Filter Servicing')
+        `, [vehMap['GJ01AB4521']]);
+      }
+      console.log('Fuel logs & expenses seeded.');
+    } else {
+      console.log('Fuel logs already exist, skipping seeding.');
+    }
+
     console.log('Database schema and seeding completed successfully!');
   } catch (error) {
     console.error('Seeding failed:', error);

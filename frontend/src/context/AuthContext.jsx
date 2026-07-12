@@ -38,11 +38,17 @@ export const AuthProvider = ({ children }) => {
       throw new Error(message);
     }
   };
-
   const signup = async (fullName, email, password, role) => {
     try {
-      await API.post('/auth/register', { fullName, email, password, role });
+      const response = await API.post('/auth/register', { fullName, email, password, roleName: role });
+      const { token, user: userData } = response.data;
+      
+      localStorage.setItem('transitops_token', token);
+      localStorage.setItem('transitops_user', JSON.stringify(userData));
+      setUser(userData);
+      
       return { success: true };
+
     } catch (error) {
       const message = error.response?.data?.error?.message || 'Registration failed. Please try again.';
       throw new Error(message);
