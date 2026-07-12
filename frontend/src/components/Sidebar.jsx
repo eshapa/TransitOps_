@@ -72,9 +72,6 @@ const Sidebar = () => {
       </div>
       
       <div className="sidebar-footer">
-        <div className="sidebar-section-label" style={{ padding: '0 1.5rem', fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem', marginTop: '1rem', textTransform: 'uppercase' }}>
-          ADMINISTRATION
-        </div>
         <div className="nav-item" style={{ cursor: 'pointer' }}>
           <span className="nav-icon"><FiSettings /></span>
           <span className="nav-text">Settings</span>
@@ -82,16 +79,6 @@ const Sidebar = () => {
         <div className="nav-item" onClick={handleLogout} style={{ cursor: 'pointer', color: 'var(--danger)' }}>
           <span className="nav-icon">→</span>
           <span className="nav-text">Logout</span>
-        </div>
-        
-        <div className="sidebar-user-profile">
-          <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${(user?.fullName || user?.name || 'User').replace(' ', '+')}&background=0066ff&color=fff`} alt="User" />
-          </div>
-          <div className="user-info">
-            <span className="user-name">{user?.fullName || user?.name || 'User'}</span>
-            <span className="user-role">{user?.role || 'Fleet Manager'}</span>
-          </div>
         </div>
       </div>
     </div>
