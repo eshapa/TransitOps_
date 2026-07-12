@@ -190,6 +190,7 @@ async function createTrip(req, res, next) {
 // Dispatch a Draft trip
 async function dispatchTrip(req, res, next) {
   const { id } = req.params;
+  const { vehicle_id, driver_id } = req.body;
 
   const connection = await pool.getConnection();
   try {
@@ -208,8 +209,21 @@ async function dispatchTrip(req, res, next) {
       return res.status(400).json({ success: false, error: { message: `Trip is already in '${oldTrip.status}' status.` } });
     }
 
+    let activeVehicleId = oldTrip.vehicle_id;
+    let activeDriverId = oldTrip.driver_id;
+
+    if (vehicle_id || driver_id) {
+      if (vehicle_id) activeVehicleId = parseInt(vehicle_id);
+      if (driver_id) activeDriverId = parseInt(driver_id);
+
+      await connection.execute(
+        "UPDATE trips SET vehicle_id = ?, driver_id = ? WHERE id = ?",
+        [activeVehicleId, activeDriverId, id]
+      );
+    }
+
     // 2. Validate rules
-    const checkResult = await validateTripRules(connection, oldTrip.vehicle_id, oldTrip.driver_id, oldTrip.cargo_weight);
+    const checkResult = await validateTripRules(connection, activeVehicleId, activeDriverId, oldTrip.cargo_weight);
     if (!checkResult.valid) {
       await connection.rollback();
       return res.status(400).json({ success: false, error: { message: checkResult.message } });
@@ -228,8 +242,8 @@ async function dispatchTrip(req, res, next) {
     }
 
     // Update statuses
-    await connection.execute("UPDATE vehicles SET status = 'On Trip' WHERE id = ?", [oldTrip.vehicle_id]);
-    await connection.execute("UPDATE drivers SET status = 'On Trip' WHERE id = ?", [oldTrip.driver_id]);
+    await connection.execute("UPDATE vehicles SET status = 'On Trip' WHERE id = ?", [activeVehicleId]);
+    await connection.execute("UPDATE drivers SET status = 'On Trip' WHERE id = ?", [activeDriverId]);
 
     // Dispatch trip
     const startOdometer = vehicle.current_odometer;

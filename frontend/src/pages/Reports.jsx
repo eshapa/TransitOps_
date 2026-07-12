@@ -34,13 +34,10 @@ const Reports = () => {
   }, [fetchData]);
 
   const handleExportCSV = () => {
-    // Direct browser redirect or opening of endpoint triggers download
     const token = localStorage.getItem('transitops_token');
     if (!token) return;
     
-    // We can fetch programmatically to download or use window.open
-    // Using fetch and creating a blob is much cleaner because it includes the Authorization header!
-    fetch('http://localhost:5000/api/reports/analytics/export-csv', {
+    fetch(`${API.defaults.baseURL}/reports/analytics/export-csv`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -63,9 +60,12 @@ const Reports = () => {
     ? (analytics.reduce((sum, item) => sum + parseFloat(item.fuel_efficiency), 0) / analytics.length).toFixed(1)
     : '0.0';
 
-  const overallAvgROI = analytics.length > 0 
+  let overallAvgROI = analytics.length > 0 
     ? (analytics.reduce((sum, item) => sum + parseFloat(item.roi), 0) / analytics.length).toFixed(1)
     : '0.0';
+  if (overallAvgROI === '-0.0') {
+    overallAvgROI = '0.0';
+  }
 
   const overallOperationalCost = analytics.reduce((sum, item) => sum + parseFloat(item.operational_cost), 0);
 
