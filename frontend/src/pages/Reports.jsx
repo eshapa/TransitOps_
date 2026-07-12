@@ -1,8 +1,35 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiBarChart2, FiDownload, FiTruck, FiActivity, FiDollarSign } from 'react-icons/fi';
+import { FiBarChart2, FiDownload, FiTruck, FiActivity, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCheckCircle } from 'react-icons/fi';
+import { BiLeaf } from 'react-icons/bi';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import './TripManagement.css'; // Reuses styles
+
+const revenueData = [
+  { name: 'Jan', revenue: 4000, expenses: 2400 },
+  { name: 'Feb', revenue: 3000, expenses: 1398 },
+  { name: 'Mar', revenue: 2000, expenses: 9800 },
+  { name: 'Apr', revenue: 2780, expenses: 3908 },
+  { name: 'May', revenue: 1890, expenses: 4800 },
+  { name: 'Jun', revenue: 2390, expenses: 3800 },
+  { name: 'Jul', revenue: 3490, expenses: 4300 },
+];
+
+const leaderboard = [
+  { id: 'FLT-9821-X', type: 'Freightliner Cascadia', util: 98, rev: '$12,400', status: 'Optimal', trend: 'up' },
+  { id: 'FLT-7740-Y', type: 'Peterbilt 579', util: 92, rev: '$10,150', status: 'Optimal', trend: 'up' },
+  { id: 'FLT-4412-Z', type: 'Volvo VNL 860', util: 64, rev: '$6,800', status: 'Pending', trend: 'down' },
+];
+
 
 const Reports = () => {
   const { user } = useAuth();
